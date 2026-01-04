@@ -1,0 +1,66 @@
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Session, select
+from database import create_db_and_tables, get_session, engine
+from models import Tool
+from logic.crawler import crawl_tools
+from logic.news import fetch_github_trending
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    
+    # Initialize Scheduler
+    scheduler = AsyncIOScheduler()
+    
+    # Define the job function that creates its own session
+    async def scheduled_crawl():
+        with Session(engine) as session:
+            await crawl_tools(session)
+            
+    # Schedule: Run once a week (e.g., Sunday at 3 AM)
+    scheduler.add_job(scheduled_crawl, CronTrigger(day_of_week='sun', hour=3, minute=0))
+    
+    # Start scheduler
+    scheduler.start()
+    print("Scheduler started: Crawler set for every Sunday at 3:00 AM.")
+    
+    yield
+    
+    scheduler.shutdown()
+
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+def read_root():
+    return {"message": "ToolsWeb API is running"}
+
+@app.get("/tools")
+def get_tools(session: Session = Depends(get_session)):
+    tools = session.exec(select(Tool)).all()
+    return tools
+
+@app.post("/crawl")
+async def trigger_crawl(background_tasks: BackgroundTasks, session: Session = Depends(get_session)):
+    # In a real app, we shouldn't pass session to background task like this directly 
+    # if the request scope closes. But for this prototype it illustrates the point.
+    # Better: Create a new session inside the task.
+    # For now, we'll await it to ensure it runs for the demo.
+    await crawl_tools(session)
+    return {"message": "Crawler triggered"}
+
+@app.get("/news")
+async def get_news():
+    news = await fetch_github_trending()
+    return news

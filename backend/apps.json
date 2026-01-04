@@ -1,0 +1,37 @@
+[
+  {
+    "name": "VS Code",
+    "category": "Programming",
+    "fetcher": "fetch_vscode"
+  },
+  {
+    "name": "Git",
+    "category": "Programming",
+    "fetcher": "fetch_git"
+  },
+  {
+    "name": "Node.js",
+    "category": "Programming",
+    "fetcher": "fetch_nodejs"
+  },
+  {
+    "name": "Python",
+    "category": "Programming",
+    "fetcher": "fetch_python"
+  },
+  {
+    "name": "VLC Media Player",
+    "category": "Media",
+    "fetcher": "fetch_vlc"
+  },
+  {
+    "name": "OBS Studio",
+    "category": "Media",
+    "fetcher": "fetch_obs"
+  },
+  {
+    "name": "Steam",
+    "category": "Games",
+    "fetcher": "fetch_steam"
+  }
+]
