@@ -7,7 +7,7 @@ import { SettingsDialog } from "@/components/ui/settings-dialog";
 import { CalendarWidget } from "@/components/ui/calendar-widget";
 import { BookmarkManager } from "@/components/ui/bookmark-manager";
 import Link from "next/link";
-import { Store, Briefcase, LayoutGrid, X, Book } from "lucide-react";
+import { Store, Briefcase, LayoutGrid, X, Book, Newspaper } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/language-context";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +17,7 @@ export default function Home() {
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showBookmarksModal, setShowBookmarksModal] = useState(false);
+  const [showTechFeed, setShowTechFeed] = useState(false);
 
   // Global Shortcut for Bookmarks (Ctrl/Cmd + B)
   useEffect(() => {
@@ -97,6 +98,19 @@ export default function Home() {
                 <button 
                   onClick={() => {
                     setIsLauncherOpen(false);
+                    setShowTechFeed(true);
+                  }}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-foreground/5 transition-colors pr-6 group whitespace-nowrap w-full text-left"
+                >
+                   <div className="p-2 bg-purple-500/10 text-purple-500 rounded-xl group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                     <Newspaper className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium text-sm">{t("trendingRepos")}</span>
+                </button>
+
+                <button 
+                  onClick={() => {
+                    setIsLauncherOpen(false);
                     setShowBookmarksModal(true);
                   }}
                   className="flex items-center gap-3 p-3 rounded-xl hover:bg-foreground/5 transition-colors pr-6 group whitespace-nowrap w-full text-left"
@@ -151,8 +165,10 @@ export default function Home() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
       </div>
 
-      <div className="w-full max-w-5xl flex flex-col items-center gap-12 pb-32">
-        <Clock />
+      <div className="w-full max-w-5xl flex flex-col items-center gap-6 pb-8">
+        <div className="scale-90 origin-bottom">
+           <Clock />
+        </div>
         <SearchBar />
         
         {/* Calendar Module */}
@@ -162,7 +178,7 @@ export default function Home() {
               initial={{ opacity: 0, height: 0, y: 20 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: 20 }}
-              className="w-full max-w-md glass rounded-3xl p-6"
+              className="w-full max-w-2xl glass rounded-3xl p-4"
             >
               <CalendarWidget />
             </motion.div>
@@ -170,7 +186,7 @@ export default function Home() {
         </AnimatePresence>
       </div>
 
-      <TechFeed />
+      <TechFeed isOpen={showTechFeed} onClose={() => setShowTechFeed(false)} />
       
       <footer className="absolute bottom-4 text-center w-full text-foreground/20 text-sm font-mono pointer-events-none">
         GEMINI.md &copy; 2026

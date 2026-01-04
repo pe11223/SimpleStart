@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ALL_ENGINES } from "@/lib/constants";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 
 export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngineIds?: string[] }) {
@@ -167,10 +167,24 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
             onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-                      placeholder={getPlaceholder(currentEngine.id)}
-                      className="flex-1 bg-transparent border-none outline-none text-xl placeholder:text-foreground/40 text-foreground h-12"
-                    />
-                      <div className="pr-4 hidden md:flex items-center gap-2 text-xs text-foreground/40 font-mono">
+            placeholder={getPlaceholder(currentEngine.id)}
+            className="flex-1 bg-transparent border-none outline-none text-xl placeholder:text-foreground/40 text-foreground h-12"
+          />
+
+          {/* Mobile Submit Button */}
+          <button
+            onClick={() => {
+              if (query.trim()) {
+                window.open(currentEngine.url + encodeURIComponent(query), "_blank");
+                setQuery("");
+              }
+            }}
+            className="md:hidden p-2 bg-foreground/10 rounded-xl active:bg-foreground/20 transition-colors"
+          >
+            <ArrowRight className="w-5 h-5 opacity-60" />
+          </button>
+
+          <div className="pr-4 hidden md:flex items-center gap-2 text-xs text-foreground/40 font-mono">
             <span className="bg-foreground/10 px-2 py-1 rounded-md">TAB</span>
             <span>{t("tabToSwitch")}</span>
           </div>

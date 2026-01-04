@@ -8,6 +8,7 @@ import { useLanguage } from "@/lib/language-context";
 
 export default function AppsPage() {
   const { t } = useLanguage();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   return (
     <main className="min-h-screen p-8 relative overflow-hidden bg-background">
@@ -17,19 +18,28 @@ export default function AppsPage() {
       </div>
 
       <div className="max-w-6xl mx-auto">
-        <header className="flex items-center gap-4 mb-12">
-          <Link 
-            href="/" 
-            className="p-3 rounded-2xl glass hover:bg-foreground/5 transition-colors text-foreground"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
-              <Rocket className="w-6 h-6" />
+        <header className="flex items-center justify-between mb-12">
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/" 
+              className="p-3 rounded-2xl glass hover:bg-foreground/5 transition-colors text-foreground"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
+                <Rocket className="w-6 h-6" />
+              </div>
+              <h1 className="text-3xl font-bold tracking-tight">{t("appCenter")}</h1>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">{t("appCenter")}</h1>
           </div>
+
+          <button 
+            onClick={() => setIsAdmin(!isAdmin)}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${isAdmin ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'glass opacity-40 hover:opacity-100'}`}
+          >
+            {t("adminMode")}
+          </button>
         </header>
 
         <motion.div
@@ -37,7 +47,7 @@ export default function AppsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-            <AppGrid />
+            <AppGrid isAdmin={isAdmin} />
         </motion.div>
       </div>
     </main>

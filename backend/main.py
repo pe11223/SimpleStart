@@ -14,23 +14,23 @@ async def lifespan(app: FastAPI):
     create_db_and_tables()
     
     # Initialize Scheduler
-    scheduler = AsyncIOScheduler()
+    # scheduler = AsyncIOScheduler()
     
     # Define the job function that creates its own session
-    async def scheduled_crawl():
-        with Session(engine) as session:
-            await crawl_tools(session)
+    # async def scheduled_crawl():
+    #     with Session(engine) as session:
+    #         await crawl_tools(session)
             
     # Schedule: Run once a week (e.g., Sunday at 3 AM)
-    scheduler.add_job(scheduled_crawl, CronTrigger(day_of_week='sun', hour=3, minute=0))
+    # scheduler.add_job(scheduled_crawl, CronTrigger(day_of_week='sun', hour=3, minute=0))
     
     # Start scheduler
-    scheduler.start()
-    print("Scheduler started: Crawler set for every Sunday at 3:00 AM.")
+    # scheduler.start()
+    # print("Scheduler started: Crawler set for every Sunday at 3:00 AM.")
     
     yield
     
-    scheduler.shutdown()
+    # scheduler.shutdown()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -50,6 +50,28 @@ def read_root():
 def get_tools(session: Session = Depends(get_session)):
     tools = session.exec(select(Tool)).all()
     return tools
+
+@app.post("/tools")
+def create_tool(tool: Tool, session: Session = Depends(get_session)):
+    session.add(tool)
+    session.commit()
+    session.refresh(tool)
+    return tool
+
+@app.put("/tools/{tool_id}")
+def update_tool(tool_id: int, tool: Tool, session: Session = Depends(get_session)):
+    db_tool = session.get(Tool, tool_id)
+    if not db_tool:
+        return {"error": "Tool not found"}
+    
+    tool_data = tool.model_dump(exclude_unset=True)
+    for key, value in tool_data.items():
+        setattr(db_tool, key, value)
+    
+    session.add(db_tool)
+    session.commit()
+    session.refresh(db_tool)
+    return db_tool
 
 @app.post("/crawl")
 async def trigger_crawl(background_tasks: BackgroundTasks, session: Session = Depends(get_session)):

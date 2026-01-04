@@ -12,9 +12,8 @@ type NewsItem = {
   language: string;
 };
 
-export function TechFeed() {
+export function TechFeed({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { t } = useLanguage();
-  const [isOpen, setIsOpen] = useState(false);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -27,8 +26,7 @@ export function TechFeed() {
   async function fetchNews() {
     setLoading(true);
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const res = await fetch(`${apiBase}/news`);
+      const res = await fetch("/api/py/news");
       if (res.ok) {
         const data = await res.json();
         setNews(data);
@@ -41,15 +39,6 @@ export function TechFeed() {
 
   return (
     <>
-      <div className="fixed bottom-8 right-8 z-30 opacity-20 hover:opacity-100 transition-opacity duration-300">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full glass shadow-2xl flex items-center justify-center text-foreground hover:scale-110 transition-transform"
-        >
-          <Newspaper className="w-6 h-6" />
-        </button>
-      </div>
-
       <AnimatePresence>
         {isOpen && (
           <>
@@ -57,7 +46,7 @@ export function TechFeed() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={onClose}
               className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
             />
             <motion.div
@@ -74,7 +63,7 @@ export function TechFeed() {
                     <h2 className="text-2xl font-bold">{t("trendingRepos")}</h2>
                   </div>
                   <button
-                    onClick={() => setIsOpen(false)}
+                    onClick={onClose}
                     className="p-2 hover:bg-foreground/5 rounded-full transition-colors"
                   >
                     <X className="w-6 h-6" />

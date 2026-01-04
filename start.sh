@@ -36,8 +36,11 @@ cd ..
 echo "-----------------------------------"
 echo "⚛️ Starting Frontend (Port $FRONTEND_PORT)..."
 cd frontend
+# Export BACKEND_PORT so Next.js server can proxy correctly
+export BACKEND_PORT=$BACKEND_PORT
 # Run Next.js in background, binding to all interfaces for server access
-npm start -- -H 0.0.0.0 -p $FRONTEND_PORT &
+# Using 'npm run dev' for development flexibility (no build step required)
+npm run dev -- -H 0.0.0.0 -p $FRONTEND_PORT &
 FRONTEND_PID=$!
 cd ..
 

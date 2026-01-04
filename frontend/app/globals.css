@@ -63,6 +63,67 @@ body {
   100% { background-position: 0% 0%; background-size: 150% 150%; }
 }
 
+/* Background Themes */
+.bg-blue-purple body {
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(250, 60%, 20%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(280, 60%, 20%, 1) 0, transparent 50%);
+}
+.dark .bg-blue-purple body {
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(250, 80%, 10%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(280, 80%, 10%, 1) 0, transparent 50%);
+}
+
+.bg-green-red body {
+  background-image: 
+    radial-gradient(at 0% 100%, hsla(140, 60%, 20%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(0, 60%, 20%, 1) 0, transparent 50%);
+}
+.dark .bg-green-red body {
+  background-image: 
+    radial-gradient(at 0% 100%, hsla(140, 80%, 10%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(0, 80%, 10%, 1) 0, transparent 50%);
+}
+
+.bg-yellow-blue body {
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(45, 60%, 20%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(210, 60%, 20%, 1) 0, transparent 50%);
+}
+.dark .bg-yellow-blue body {
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(45, 80%, 10%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(210, 80%, 10%, 1) 0, transparent 50%);
+}
+
+.bg-full-color body {
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(0, 30%, 15%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(180, 30%, 15%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 50%, hsla(90, 30%, 10%, 1) 0, transparent 50%);
+  background-size: 200% 200%;
+  animation: full-color-flow 30s ease infinite alternate;
+  background-attachment: fixed;
+}
+.dark .bg-full-color body {
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(0, 40%, 8%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(180, 40%, 8%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 50%, hsla(90, 40%, 5%, 1) 0, transparent 50%);
+}
+
+@keyframes full-color-flow {
+  0% { filter: hue-rotate(0deg); background-position: 0% 0%; }
+  100% { filter: hue-rotate(360deg); background-position: 100% 100%; }
+}
+
+@keyframes glowing {
+  0% { background-position: 0 0; }
+  50% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
 @utility glass {
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(16px) saturate(180%);
