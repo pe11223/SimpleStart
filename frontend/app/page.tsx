@@ -151,7 +151,7 @@ export default function Home() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
       </div>
 
-      <div className="w-full max-w-5xl flex flex-col items-center gap-12">
+      <div className="w-full max-w-5xl flex flex-col items-center gap-12 pb-32">
         <Clock />
         <SearchBar />
         

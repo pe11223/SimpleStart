@@ -18,29 +18,33 @@ trap cleanup SIGINT
 
 echo "🚀 Starting SimpleStart services..."
 
+# Default Ports (can be overridden by environment variables)
+BACKEND_PORT=${BACKEND_PORT:-8000}
+FRONTEND_PORT=${FRONTEND_PORT:-3000}
+
 # --- Start Backend ---
 echo "-----------------------------------"
-echo "🐍 Starting Backend (Port 8000)..."
+echo "🐍 Starting Backend (Port $BACKEND_PORT)..."
 cd backend
 source venv/bin/activate
 # Run uvicorn in background
-uvicorn main:app --host 0.0.0.0 --port 8000 &
+uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT &
 BACKEND_PID=$!
 cd ..
 
 # --- Start Frontend ---
 echo "-----------------------------------"
-echo "⚛️ Starting Frontend (Port 3000)..."
+echo "⚛️ Starting Frontend (Port $FRONTEND_PORT)..."
 cd frontend
 # Run Next.js in background, binding to all interfaces for server access
-npm start -- -H 0.0.0.0 -p 3000 &
+npm start -- -H 0.0.0.0 -p $FRONTEND_PORT &
 FRONTEND_PID=$!
 cd ..
 
 echo "-----------------------------------"
 echo "✅ Application is running!"
-echo "   Backend API: http://<server-ip>:8000"
-echo "   Frontend UI: http://<server-ip>:3000"
+echo "   Backend API: http://<server-ip>:$BACKEND_PORT"
+echo "   Frontend UI: http://<server-ip>:$FRONTEND_PORT"
 echo "   (Press Ctrl+C to stop both)"
 echo "-----------------------------------"
 

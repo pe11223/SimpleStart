@@ -27,7 +27,8 @@ export function TechFeed() {
   async function fetchNews() {
     setLoading(true);
     try {
-      const res = await fetch("http://212.64.81.175:8000/news");
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${apiBase}/news`);
       if (res.ok) {
         const data = await res.json();
         setNews(data);
