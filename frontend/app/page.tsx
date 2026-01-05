@@ -189,7 +189,7 @@ export default function Home() {
       <TechFeed isOpen={showTechFeed} onClose={() => setShowTechFeed(false)} />
       
       <footer className="absolute bottom-4 text-center w-full text-foreground/20 text-sm font-mono pointer-events-none">
-        GEMINI.md &copy; 2026
+        SimpleStart &copy; 2026
       </footer>
     </main>
   );

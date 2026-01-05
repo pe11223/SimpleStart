@@ -16,7 +16,7 @@ type Bookmark = {
 
 export function Bookmarks({ className }: { className?: string }) {
   const { t } = useLanguage();
-  const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>("gemini-bookmarks", []);
+  const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>("simplestart-bookmarks", []);
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newUrl, setNewUrl] = useState("");

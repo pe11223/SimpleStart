@@ -31,7 +31,7 @@ const getFolderIcon = (name: string) => {
 
 export function BookmarkManager() {
   const { t } = useLanguage();
-  const [items, setItems] = useLocalStorage<Item[]>("gemini-enhanced-bookmarks", []);
+  const [items, setItems] = useLocalStorage<Item[]>("simplestart-enhanced-bookmarks", []);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   
   // UI States

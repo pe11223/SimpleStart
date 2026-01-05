@@ -21,7 +21,7 @@ export function CalendarWidget() {
   const dateLocale = language === "zh" ? zhCN : enUS;
   
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [events, setEvents] = useLocalStorage<Event[]>("gemini-calendar-events-v2", []);
+  const [events, setEvents] = useLocalStorage<Event[]>("simplestart-calendar-events-v2", []);
   
   // Selection
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());

@@ -16,7 +16,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("gemini-language") as Language;
+    const saved = localStorage.getItem("simplestart-language") as Language;
     if (saved && (saved === "en" || saved === "zh")) {
       setLanguage(saved);
     }
@@ -25,7 +25,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang);
-    localStorage.setItem("gemini-language", lang);
+    localStorage.setItem("simplestart-language", lang);
   };
 
   const t = (key: keyof typeof translations.en) => {

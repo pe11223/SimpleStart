@@ -32,7 +32,7 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
 
   // Load persistence
   useEffect(() => {
-    const saved = localStorage.getItem("gemini-enabled-engines");
+    const saved = localStorage.getItem("simplestart-enabled-engines");
     if (saved) {
       try {
         setEnabledIds(JSON.parse(saved));
@@ -44,7 +44,7 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
 
   const saveEnabledIds = (ids: string[]) => {
     setEnabledIds(ids);
-    localStorage.setItem("gemini-enabled-engines", JSON.stringify(ids));
+    localStorage.setItem("simplestart-enabled-engines", JSON.stringify(ids));
   };
 
   // Derived active engines list
@@ -168,7 +168,7 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={getPlaceholder(currentEngine.id)}
-            className="flex-1 bg-transparent border-none outline-none text-xl placeholder:text-foreground/40 text-foreground h-12"
+            className="flex-1 bg-transparent border-none outline-none text-xl placeholder:text-foreground/40 text-foreground h-12 min-w-0"
           />
 
           {/* Mobile Submit Button */}
@@ -179,7 +179,7 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
                 setQuery("");
               }
             }}
-            className="md:hidden p-2 bg-foreground/10 rounded-xl active:bg-foreground/20 transition-colors"
+            className="md:hidden p-2 bg-foreground/10 rounded-xl active:bg-foreground/20 transition-colors shrink-0"
           >
             <ArrowRight className="w-5 h-5 opacity-60" />
           </button>

@@ -2,36 +2,85 @@
   {
     "name": "VS Code",
     "category": "Programming",
-    "fetcher": "fetch_vscode"
+    "homepage_url": "https://code.visualstudio.com/",
+    "icon_url": "https://code.visualstudio.com/assets/images/code-stable.png",
+    "versions": [
+      { "version": "Stable (User)", "url": "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-user" },
+      { "version": "Insiders", "url": "https://code.visualstudio.com/sha/download?build=insider&os=win32-x64-user" }
+    ]
   },
   {
     "name": "Git",
     "category": "Programming",
-    "fetcher": "fetch_git"
+    "homepage_url": "https://git-scm.com/",
+    "icon_url": "https://git-scm.com/images/logos/downloads/Git-Icon-1788C.png",
+    "versions": [
+      { "version": "Latest (64-bit)", "url": "https://github.com/git-for-windows/git/releases/latest/download/Git-2.43.0-64-bit.exe" }
+    ]
   },
   {
     "name": "Node.js",
     "category": "Programming",
-    "fetcher": "fetch_nodejs"
+    "homepage_url": "https://nodejs.org/",
+    "icon_url": "https://nodejs.org/static/images/logo.svg",
+    "versions": [
+      { "version": "LTS (v20)", "url": "https://nodejs.org/dist/v20.11.0/node-v20.11.0-x64.msi" },
+      { "version": "Current (v21)", "url": "https://nodejs.org/dist/v21.6.1/node-v21.6.1-x64.msi" }
+    ]
   },
   {
     "name": "Python",
     "category": "Programming",
-    "fetcher": "fetch_python"
+    "homepage_url": "https://www.python.org/",
+    "icon_url": "https://www.python.org/static/community_logos/python-logo-generic.svg",
+    "versions": [
+      { "version": "3.12", "url": "https://www.python.org/ftp/python/3.12.1/python-3.12.1-amd64.exe" },
+      { "version": "3.11", "url": "https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe" }
+    ]
   },
   {
     "name": "VLC Media Player",
     "category": "Media",
-    "fetcher": "fetch_vlc"
+    "homepage_url": "https://www.videolan.org/",
+    "icon_url": "https://images.videolan.org/images/largeVLC.png",
+    "versions": [
+      { "version": "Latest", "url": "https://get.videolan.org/vlc/3.0.20/win64/vlc-3.0.20-win64.exe" }
+    ]
   },
   {
     "name": "OBS Studio",
     "category": "Media",
-    "fetcher": "fetch_obs"
+    "homepage_url": "https://obsproject.com/",
+    "icon_url": "https://obsproject.com/assets/images/new_icon_small.png",
+    "versions": [
+      { "version": "Latest", "url": "https://cdn-fastly.obsproject.com/downloads/OBS-Studio-30.0.2-Full-Installer-x64.exe" }
+    ]
   },
   {
     "name": "Steam",
     "category": "Games",
-    "fetcher": "fetch_steam"
+    "homepage_url": "https://store.steampowered.com/",
+    "icon_url": "https://store.steampowered.com/favicon.ico",
+    "versions": [
+      { "version": "Latest", "url": "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe" }
+    ]
+  },
+  {
+    "name": "Epic Games",
+    "category": "Games",
+    "homepage_url": "https://store.epicgames.com/",
+    "icon_url": "https://static-assets-prod.epicgames.com/epic-store/static/favicon.ico",
+    "versions": [
+      { "version": "Installer", "url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi" }
+    ]
+  },
+  {
+    "name": "Discord",
+    "category": "Social",
+    "homepage_url": "https://discord.com/",
+    "icon_url": "https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png",
+    "versions": [
+      { "version": "Stable", "url": "https://discord.com/api/download?platform=win" }
+    ]
   }
 ]

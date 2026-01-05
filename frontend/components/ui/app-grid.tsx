@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Terminal, Code2, Database, Globe, Container, GitGraph, AppWindow, Zap, Box, Package, Clapperboard, Gamepad, Video, Apple, Smartphone, Plus, Pencil, Trash2, X } from "lucide-react";
+import { Terminal, Code2, Database, Globe, Container, GitGraph, AppWindow, Zap, Box, Package, Clapperboard, Gamepad, Video, Apple, Smartphone, Plus, Pencil, Trash2, X, Download, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useOS } from "@/lib/hooks";
+
+type Version = {
+  version: string;
+  url: string;
+};
 
 type Tool = {
   id?: number;
@@ -14,6 +19,7 @@ type Tool = {
   version?: string;
   smart_download_url?: string;
   icon_url?: string;
+  versions?: Version[];
 };
 
 const ICON_MAP: Record<string, any> = {
@@ -29,6 +35,8 @@ const ICON_MAP: Record<string, any> = {
   "VLC Media Player": Clapperboard,
   "OBS Studio": Video,
   "Steam": Gamepad,
+  "Epic Games": Gamepad,
+  "Discord": Smartphone, // Using Smartphone as a generic social icon if needed, or maybe something else
   "Xcode": Apple,
   "TikTok": Smartphone,
   "WeChat": Smartphone
@@ -40,6 +48,9 @@ export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
   const [apps, setApps] = useState<Tool[]>([]);
   const [editingApp, setEditingApp] = useState<Tool | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  
+  // State for version selection modal
+  const [selectedAppForDownload, setSelectedAppForDownload] = useState<Tool | null>(null);
 
   // Form states
   const [name, setName] = useState("");
@@ -116,14 +127,14 @@ export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
     }
   };
 
-  const deleteApp = async (id: number) => {
-    if (!confirm(t("confirmDelete"))) return;
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    try {
-      // Assuming a DELETE endpoint exists or just use a flag. 
-      // For now, let's assume we can just overwrite or leave it.
-      // If no DELETE endpoint was added, I'll stick to Add/Edit.
-    } catch (e) {}
+  const handleAppClick = (app: Tool) => {
+    if (app.versions && app.versions.length > 1) {
+      setSelectedAppForDownload(app);
+    } else if (app.versions && app.versions.length === 1) {
+      window.open(app.versions[0].url, "_blank");
+    } else {
+      window.open(app.smart_download_url || app.homepage_url, "_blank");
+    }
   };
 
   // Group by category
@@ -146,6 +157,51 @@ export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
            </button>
         </div>
       )}
+
+      {/* Version Selection Modal */}
+      <AnimatePresence>
+        {selectedAppForDownload && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setSelectedAppForDownload(null)} 
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.95 }} 
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm glass rounded-3xl p-6 z-50 shadow-2xl"
+            >
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-3">
+                        {selectedAppForDownload.icon_url && <img src={selectedAppForDownload.icon_url} className="w-8 h-8 rounded-lg" alt={selectedAppForDownload.name} />}
+                        <h2 className="text-xl font-bold">{selectedAppForDownload.name}</h2>
+                    </div>
+                    <button onClick={() => setSelectedAppForDownload(null)} className="p-1 hover:bg-foreground/5 rounded-full"><X className="w-5 h-5" /></button>
+                </div>
+                <div className="flex flex-col gap-2">
+                    <p className="text-sm text-foreground/60 mb-2">Select a version to download:</p>
+                    {selectedAppForDownload.versions?.map((ver, idx) => (
+                        <a 
+                            key={idx}
+                            href={ver.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between p-3 rounded-xl bg-foreground/5 hover:bg-foreground/10 transition-colors group"
+                            onClick={() => setSelectedAppForDownload(null)}
+                        >
+                            <span className="font-mono font-medium">{ver.version}</span>
+                            <Download className="w-4 h-4 opacity-50 group-hover:opacity-100" />
+                        </a>
+                    ))}
+                </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Form Overlay */}
       <AnimatePresence>
@@ -201,11 +257,9 @@ export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
                 const Icon = ICON_MAP[app.name] || AppWindow;
                 return (
                   <div key={app.name + index} className="relative group">
-                    <motion.a
-                      href={app.smart_download_url || app.homepage_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center gap-3"
+                    <motion.div
+                      onClick={() => handleAppClick(app)}
+                      className="flex flex-col items-center gap-3 cursor-pointer"
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.1 * index }}
@@ -218,18 +272,23 @@ export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
                         ) : (
                             <Icon className="w-8 h-8 md:w-10 md:h-10" strokeWidth={1.5} />
                         )}
-                        {app.version && (
+                        {app.versions && app.versions.length > 1 && (
+                          <span className="absolute top-1 right-1 bg-foreground/80 text-[9px] text-background px-1.5 py-0.5 rounded-full font-bold shadow-sm">
+                            {app.versions.length}
+                          </span>
+                        )}
+                        {!app.versions && app.version && (
                           <span className="absolute top-1 right-1 bg-blue-500 text-[9px] text-white px-1.5 py-0.5 rounded-full font-bold shadow-sm">
                             {app.version}
                           </span>
                         )}
                       </div>
                       <span className="text-sm font-medium text-foreground/70 text-center">{app.name}</span>
-                    </motion.a>
+                    </motion.div>
                     
                     {isAdmin && (
                         <button 
-                            onClick={() => startEditing(app)}
+                            onClick={(e) => { e.stopPropagation(); startEditing(app); }}
                             className="absolute -top-2 -right-2 p-2 bg-white dark:bg-zinc-800 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity text-blue-500 border border-foreground/10"
                         >
                             <Pencil className="w-4 h-4" />

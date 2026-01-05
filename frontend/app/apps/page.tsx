@@ -1,6 +1,7 @@
 "use client";
 
 import { AppGrid } from "@/components/ui/app-grid";
+import { useState } from "react";
 import { ArrowLeft, Rocket } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -34,12 +35,14 @@ export default function AppsPage() {
             </div>
           </div>
 
+          {/* Admin Mode Toggle Hidden
           <button 
             onClick={() => setIsAdmin(!isAdmin)}
             className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${isAdmin ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'glass opacity-40 hover:opacity-100'}`}
           >
             {t("adminMode")}
           </button>
+          */}
         </header>
 
         <motion.div

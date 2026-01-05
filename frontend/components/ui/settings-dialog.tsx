@@ -39,7 +39,7 @@ export function SettingsDialog({
   const toggleCalendar = () => {
     const newVal = !showCalendar;
     setShowCalendar(newVal);
-    localStorage.setItem("gemini-show-calendar", JSON.stringify(newVal));
+    localStorage.setItem("simplestart-show-calendar", JSON.stringify(newVal));
     onCalendarToggle?.(newVal);
   };
 
@@ -54,8 +54,9 @@ export function SettingsDialog({
 
   const changeBgTheme = (themeName: string) => {
     setBgTheme(themeName);
-    localStorage.setItem("gemini-bg-theme", themeName);
     applyBgTheme(themeName);
+    localStorage.setItem("simplestart-bg-theme", themeName);
+    window.dispatchEvent(new Event("bg-theme-change"));
   };
 
   return (
