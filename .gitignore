@@ -1,0 +1,4 @@
+
+backend/venv/
+.next/
+node_modules/
