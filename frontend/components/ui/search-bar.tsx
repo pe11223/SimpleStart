@@ -197,7 +197,7 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute top-full left-0 mt-4 w-64 glass rounded-2xl p-2 flex flex-col gap-1 shadow-2xl z-50 overflow-hidden"
+              className="absolute top-full left-0 mt-4 w-64 glass rounded-2xl p-2 flex flex-col gap-1 shadow-2xl z-50 overflow-y-auto max-h-[300px]"
             >
                <div className="px-3 py-2 text-xs font-bold text-foreground/40 uppercase tracking-wider">
                  Select Search Engine

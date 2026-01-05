@@ -32,7 +32,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <main className="min-h-[100dvh] w-full flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <SettingsDialog onCalendarToggle={setShowCalendar} />
       
       {/* Top Left Launcher */}

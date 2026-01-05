@@ -44,12 +44,26 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"message": "ToolsWeb API is running"}
+    return {"message": "SimpleStart API is running"}
+
+import json
+from pathlib import Path
+
+# ... (imports)
 
 @app.get("/tools")
-def get_tools(session: Session = Depends(get_session)):
-    tools = session.exec(select(Tool)).all()
-    return tools
+def get_tools():
+    # Serve directly from apps.json for manual configuration
+    try:
+        with open("apps.json", "r", encoding="utf-8") as f:
+            tools = json.load(f)
+        return tools
+    except FileNotFoundError:
+        return []
+
+# @app.post("/tools") ... (comment out or leave as is if not used)
+# For now, we disable the DB write endpoints as we are using manual JSON config
+
 
 @app.post("/tools")
 def create_tool(tool: Tool, session: Session = Depends(get_session)):
