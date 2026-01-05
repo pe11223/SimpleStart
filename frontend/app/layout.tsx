@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gemini Workbench",
+  title: "SimpleStart",
   description: "A minimalist dashboard for developers",
 };
 

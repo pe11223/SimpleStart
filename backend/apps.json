@@ -1,37 +1,72 @@
 [
   {
+    "id": 1,
     "name": "VS Code",
     "category": "Programming",
-    "fetcher": "fetch_vscode"
+    "description": "Code editing. Redefined.",
+    "icon_url": "https://code.visualstudio.com/assets/images/code-stable.png",
+    "homepage_url": "https://code.visualstudio.com/",
+    "versions": [
+      {
+        "version": "1.85.1",
+        "date": "2023-12-13",
+        "url": "https://vscode.cdn.azure.cn/stable/c722ca6c7eed9d7d8758957e36dfaa184febbb8e/VSCodeUserSetup-x64-1.85.1.exe"
+      },
+      {
+        "version": "1.84.2",
+        "date": "2023-11-01",
+        "url": "https://vscode.cdn.azure.cn/stable/1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/VSCodeUserSetup-x64-1.84.2.exe"
+      }
+    ]
   },
   {
+    "id": 2,
     "name": "Git",
     "category": "Programming",
-    "fetcher": "fetch_git"
+    "description": "Distributed version control.",
+    "icon_url": "https://git-scm.com/images/logos/downloads/Git-Icon-1788C.png",
+    "homepage_url": "https://git-scm.com/",
+    "versions": [
+      {
+        "version": "2.43.0",
+        "date": "2023-11-20",
+        "url": "https://github.com/git-for-windows/git/releases/download/v2.43.0.windows.1/Git-2.43.0-64-bit.exe"
+      }
+    ]
   },
   {
+    "id": 3,
     "name": "Node.js",
     "category": "Programming",
-    "fetcher": "fetch_nodejs"
+    "description": "JavaScript runtime built on Chrome's V8 JavaScript engine.",
+    "icon_url": "https://nodejs.org/static/images/logo.svg",
+    "homepage_url": "https://nodejs.org/",
+    "versions": [
+      {
+        "version": "20.10.0 (LTS)",
+        "date": "2023-10-24",
+        "url": "https://nodejs.org/dist/v20.10.0/node-v20.10.0-x64.msi"
+      },
+      {
+        "version": "21.5.0",
+        "date": "2023-12-20",
+        "url": "https://nodejs.org/dist/v21.5.0/node-v21.5.0-x64.msi"
+      }
+    ]
   },
   {
+    "id": 4,
     "name": "Python",
     "category": "Programming",
-    "fetcher": "fetch_python"
-  },
-  {
-    "name": "VLC Media Player",
-    "category": "Media",
-    "fetcher": "fetch_vlc"
-  },
-  {
-    "name": "OBS Studio",
-    "category": "Media",
-    "fetcher": "fetch_obs"
-  },
-  {
-    "name": "Steam",
-    "category": "Games",
-    "fetcher": "fetch_steam"
+    "description": "A programming language that lets you work quickly.",
+    "icon_url": "https://www.python.org/static/community_logos/python-logo-generic.svg",
+    "homepage_url": "https://www.python.org/",
+    "versions": [
+      {
+        "version": "3.12.1",
+        "date": "2023-12-08",
+        "url": "https://www.python.org/ftp/python/3.12.1/python-3.12.1-amd64.exe"
+      }
+    ]
   }
 ]

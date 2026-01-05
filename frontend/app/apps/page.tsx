@@ -8,7 +8,6 @@ import { useLanguage } from "@/lib/language-context";
 
 export default function AppsPage() {
   const { t } = useLanguage();
-  const [isAdmin, setIsAdmin] = useState(false);
 
   return (
     <main className="min-h-screen p-8 relative overflow-hidden bg-background">
@@ -33,13 +32,6 @@ export default function AppsPage() {
               <h1 className="text-3xl font-bold tracking-tight">{t("appCenter")}</h1>
             </div>
           </div>
-
-          <button 
-            onClick={() => setIsAdmin(!isAdmin)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${isAdmin ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'glass opacity-40 hover:opacity-100'}`}
-          >
-            {t("adminMode")}
-          </button>
         </header>
 
         <motion.div
@@ -47,7 +39,7 @@ export default function AppsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-            <AppGrid isAdmin={isAdmin} />
+            <AppGrid />
         </motion.div>
       </div>
     </main>
