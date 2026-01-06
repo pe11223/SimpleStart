@@ -15,8 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SimpleStart",
-  description: "A minimalist dashboard for developers",
+  title: "SimpleStart - Developer's Dashboard",
+  description: "A minimalist, responsive dashboard for developers. Features automatic tool updates, local acceleration, and a clean UI.",
+  keywords: ["dashboard", "developer", "startpage", "tools", "simplestart", "navigation"],
+  openGraph: {
+    title: "SimpleStart",
+    description: "A minimalist dashboard for developers",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

@@ -7,7 +7,7 @@ import { SettingsDialog } from "@/components/ui/settings-dialog";
 import { CalendarWidget } from "@/components/ui/calendar-widget";
 import { BookmarkManager } from "@/components/ui/bookmark-manager";
 import Link from "next/link";
-import { Store, Briefcase, LayoutGrid, X, Book, Newspaper } from "lucide-react";
+import { Store, Briefcase, LayoutGrid, X, Book, Newspaper, Github } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/language-context";
 import { motion, AnimatePresence } from "framer-motion";
@@ -189,8 +189,17 @@ export default function Home() {
 
       <TechFeed isOpen={showTechFeed} onClose={() => setShowTechFeed(false)} />
       
-      <footer className="absolute bottom-4 text-center w-full text-foreground/20 text-sm font-mono pointer-events-none">
-        SimpleStart &copy; 2026
+      <footer className="absolute bottom-4 w-full flex flex-row items-center justify-center gap-2 text-foreground/20 text-sm font-mono pointer-events-none">
+        <span>SimpleStart &copy; 2026</span>
+        <a 
+          href="https://github.com/pe11223/SimpleStart" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="pointer-events-auto hover:text-foreground/40 transition-colors flex items-center"
+          aria-label="GitHub Repository"
+        >
+          <Github className="w-5 h-5" />
+        </a>
       </footer>
     </main>
   );

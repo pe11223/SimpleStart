@@ -83,8 +83,8 @@ export function SettingsDialog({
                     </h2>
                     <div className="relative group cursor-help">
                         <HelpCircle className="w-4 h-4 text-foreground/40 hover:text-foreground/80 transition-colors" />
-                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-foreground/90 text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                            v0.1.1
+                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-foreground/90 text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                            <span className="font-mono font-bold">v0.1.3</span>
                         </div>
                     </div>
                 </div>

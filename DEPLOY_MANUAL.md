@@ -33,7 +33,7 @@ sudo apt install python3 python3-pip python3-venv nginx git -y
 1.  **下载代码**
     ```bash
     cd /var/www  # 或者您喜欢的任何目录
-    sudo git clone https://github.com/your-username/xxx.git
+    sudo git clone https://github.com/pe11223/SimpleStart.git
     cd xxx/backend
     ```
 

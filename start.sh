@@ -27,6 +27,8 @@ echo "-----------------------------------"
 echo "🐍 Starting Backend (Port $BACKEND_PORT)..."
 cd backend
 source venv/bin/activate
+# Ensure Playwright browsers are installed
+playwright install chromium
 # Run uvicorn in background
 uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT &
 BACKEND_PID=$!

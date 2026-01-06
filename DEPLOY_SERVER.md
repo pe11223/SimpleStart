@@ -19,7 +19,7 @@
 1.  **上传代码到服务器**：
     ```bash
     # 在您的服务器上
-    git clone https://github.com/your-username/xxx.git
+    git clone https://github.com/pe11223/SimpleStart.git
     cd xxx
     ```
 

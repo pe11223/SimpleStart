@@ -73,7 +73,7 @@
 
 1.  **克隆仓库**
     ```bash
-    git clone https://github.com/your-username/SimpleStart.git
+    git clone https://github.com/pe11223/SimpleStart.git
     cd SimpleStart
     ```
 
