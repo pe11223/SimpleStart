@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, X, Sun, Moon, Languages, Calendar as CalendarIcon, ToggleRight, ToggleLeft, Paintbrush } from "lucide-react";
+import { Settings, X, Sun, Moon, Languages, Calendar as CalendarIcon, ToggleRight, ToggleLeft, Paintbrush, HelpCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/language-context";
 
@@ -87,9 +87,17 @@ export function SettingsDialog({
               className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-card border border-glass-border shadow-2xl rounded-3xl z-50 p-6"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Settings className="w-5 h-5" /> {t("settings")}
-                </h2>
+                <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                        <Settings className="w-5 h-5" /> {t("settings")}
+                    </h2>
+                    <div className="relative group cursor-help">
+                        <HelpCircle className="w-4 h-4 text-foreground/40 hover:text-foreground/80 transition-colors" />
+                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-foreground/90 text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                            v0.1.0
+                        </div>
+                    </div>
+                </div>
                 <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-foreground/5 rounded-full">
                   <X className="w-5 h-5" />
                 </button>
