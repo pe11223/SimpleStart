@@ -37,6 +37,7 @@ app.add_middleware(
 
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
+from playwright.async_api import async_playwright
 
 @app.get("/api/favicon")
 async def get_favicon(url: str):
@@ -52,8 +53,9 @@ async def get_favicon(url: str):
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
     }
 
-    async with httpx.AsyncClient(follow_redirects=True, verify=False, timeout=5.0) as client:
-        try:
+    # Strategy 1: Fast & Lightweight (HTTPX + BeautifulSoup)
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, verify=False, timeout=5.0) as client:
             # 2. Try to fetch the page HTML directly
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
@@ -85,16 +87,49 @@ async def get_favicon(url: str):
                             content_type = img_resp.headers.get("content-type", "").lower()
                             if "image" in content_type or img_url.endswith(".ico"):
                                 b64_img = base64.b64encode(img_resp.content).decode("utf-8")
-                                # Fallback content type if missing
                                 final_type = content_type if "image" in content_type else "image/x-icon"
                                 return {"icon": f"data:{final_type};base64,{b64_img}"}
                     except Exception:
                         continue
+    except Exception as e:
+        print(f"Fast scrape failed for {url}: {e}")
 
-        except Exception as e:
-            print(f"Direct scrape failed for {url}: {e}")
+    # Strategy 2: Heavy & Robust (Playwright Headless Browser)
+    # Useful for sites with heavy anti-bot protections (Cloudflare, Aliyun) or dynamic JS rendering
+    print(f"Attempting Playwright for {url}...")
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            # Create context with realistic user agent
+            context = await browser.new_context(user_agent=headers["User-Agent"])
+            page = await context.new_page()
+            try:
+                # Shorter timeout to fail fast
+                await page.goto(url, timeout=15000, wait_until="domcontentloaded")
+                
+                # Execute JS to find icon
+                icon_href = await page.evaluate("""() => {
+                    const link = document.querySelector('link[rel*="icon"]') || document.querySelector('link[rel="apple-touch-icon"]');
+                    return link ? link.href : null;
+                }""")
+                
+                if icon_href:
+                     # Download content using the page context (preserves session/cookies)
+                     response = await page.request.get(icon_href)
+                     if response.status == 200:
+                         body = await response.body()
+                         content_type = response.headers.get("content-type", "image/png")
+                         b64_img = base64.b64encode(body).decode("utf-8")
+                         return {"icon": f"data:{content_type};base64,{b64_img}"}
+            except Exception as e:
+                print(f"Playwright scrape error: {e}")
+            finally:
+                await browser.close()
+    except Exception as e:
+        print(f"Playwright failed: {e}")
 
-        # 5. Last Resort: Fallback to Third-Party APIs (if direct access fails e.g. anti-bot)
+    # Strategy 3: Third-Party APIs (Last Resort)
+    async with httpx.AsyncClient(follow_redirects=True, verify=False, timeout=5.0) as client:
         providers = [
             f"https://api.uomg.com/api/get.favicon?url={url}",
             f"https://www.google.com/s2/favicons?domain={url}&sz=128"
