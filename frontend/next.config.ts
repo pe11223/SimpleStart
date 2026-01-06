@@ -6,11 +6,12 @@ const nextConfig: NextConfig = {
     position: 'bottom-right',
   },
   async rewrites() {
-    const backendPort = process.env.BACKEND_PORT || "8000";
+    const backendPort = process.env.BACKEND_PORT || "8001";
+    const backendHost = process.env.BACKEND_HOST || "127.0.0.1";
     return [
       {
         source: "/api/py/:path*",
-        destination: `http://127.0.0.1:${backendPort}/:path*`, // Proxy to Backend
+        destination: `http://${backendHost}:${backendPort}/:path*`, // Proxy to Backend
       },
     ];
   },

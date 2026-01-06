@@ -4,7 +4,7 @@ services:
     container_name: simplestart-backend
     restart: always
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./backend/database.db:/app/database.db # Persist SQLite DB
       - ./backend/apps.json:/app/apps.json     # Config file
@@ -19,6 +19,8 @@ services:
       - "3000:3000"
     environment:
       - BACKEND_URL=http://backend:8000
+      - BACKEND_HOST=backend
+      - BACKEND_PORT=8000
     depends_on:
       - backend
 

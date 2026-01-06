@@ -1,0 +1,20 @@
+server {
+    # 1. 监听标准 HTTP 端口 (80)
+    listen 80;
+    
+    # 2. 绑定您的域名
+    server_name simplestart.top www.simplestart.top;
+
+    # 3. 根路径转发给前端 (Port 3000)
+    location / {
+        proxy_pass http://localhost:3000; # 如果 Nginx 在主机上，前端容器映射了 3000 端口
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # 4. (可选) 如果有需要直接访问后端的接口，也可以配置
+    # 但目前我们已经通过 Next.js 的 /api/py 代理了，所以通常不需要额外配置
+}
