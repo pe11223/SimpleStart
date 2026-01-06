@@ -94,27 +94,55 @@ async def get_favicon(url: str):
     except Exception as e:
         print(f"Fast scrape failed for {url}: {e}")
 
-    # Strategy 2: Heavy & Robust (Playwright Headless Browser)
+    # Strategy 2: Heavy & Robust (Playwright Headless Browser) - STEALTH MODE
     # Useful for sites with heavy anti-bot protections (Cloudflare, Aliyun) or dynamic JS rendering
     print(f"Attempting Playwright for {url}...")
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            # Create context with realistic user agent
-            context = await browser.new_context(user_agent=headers["User-Agent"])
+            # Launch with anti-detection arguments
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--disable-blink-features=AutomationControlled", # Hides "Chrome is being controlled by automated test software"
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox"
+                ]
+            )
+            
+            # Create context with realistic User-Agent and Viewport
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                viewport={"width": 1920, "height": 1080},
+                locale="zh-CN"
+            )
+            
+            # Inject JS to delete 'navigator.webdriver' property (Key for bypassing detection)
+            await context.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                });
+            """)
+
             page = await context.new_page()
             try:
-                # Shorter timeout to fail fast
+                # Go to page. For SPAs (Koodo), we need to wait for network to be idle-ish.
+                # Timeout set to 15s to avoid hanging.
                 await page.goto(url, timeout=15000, wait_until="domcontentloaded")
                 
-                # Execute JS to find icon
+                # Try to wait for network idle (useful for SPAs loading config), but don't crash if it times out
+                try:
+                    await page.wait_for_load_state("networkidle", timeout=3000)
+                except:
+                    pass
+                
+                # Execute JS to find icon. We look for standard tags.
                 icon_href = await page.evaluate("""() => {
                     const link = document.querySelector('link[rel*="icon"]') || document.querySelector('link[rel="apple-touch-icon"]');
                     return link ? link.href : null;
                 }""")
                 
                 if icon_href:
-                     # Download content using the page context (preserves session/cookies)
+                     # Download using the page context (preserves cookies/session passed anti-bot)
                      response = await page.request.get(icon_href)
                      if response.status == 200:
                          body = await response.body()
