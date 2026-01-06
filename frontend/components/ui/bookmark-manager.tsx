@@ -108,7 +108,7 @@ export function BookmarkManager() {
                 const data = await res.json();
                 if (data.icon) {
                     // Update the specific item with the fetched icon
-                    setItems(prevItems => prevItems.map(item => 
+                    setItems((prevItems: Item[]) => prevItems.map(item => 
                         item.id === newId ? { ...item, icon: data.icon } : item
                     ));
                 }
