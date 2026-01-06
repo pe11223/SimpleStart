@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Briefcase, FileText, Image as ImageIcon, Code2, Wrench } from "lucide-react";
+import { ArrowLeft, Briefcase, FileText, Image as ImageIcon, Code2, Wrench, LayoutGrid, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/language-context";
@@ -10,33 +10,51 @@ export default function ToolsPage() {
 
   const TOOLS_CATEGORIES = [
     {
-      title: "PDF Tools",
+      title: t("fileTools"),
+      tools: [
+        {
+          name: t("epubTermReplacement"),
+          desc: t("epubTermReplacementDesc"),
+          icon: BookOpen,
+          href: "/tools/epub-term-replacement"
+        },
+        {
+          name: t("pdfToImage"),
+          desc: t("pdfToImageDesc"),
+          icon: ImageIcon,
+          href: "/tools/pdf-to-image"
+        }
+      ]
+    },
+    {
+      title: t("imageTools"),
       tools: [
         { 
-          name: "Image to PDF", 
+          name: t("imageToPdfTitle"), 
           desc: t("imageToPdf"), 
           icon: FileText, 
           href: "/tools/image-to-pdf" 
-        }
-      ]
-    },
-    {
-      title: "Image Tools",
-      tools: [
+        },
         { 
-          name: t("comingSoon"), 
-          desc: "Image compression & resizing.", 
+          name: t("imageCompression"), 
+          desc: t("imageCompressionDesc"), 
           icon: ImageIcon, 
-          href: "#" 
+          href: "/tools/image-compression" 
+        },
+        { 
+          name: t("imageStitching"), 
+          desc: t("imageStitchingDesc"), 
+          icon: LayoutGrid, 
+          href: "/tools/image-stitching" 
         }
       ]
     },
     {
-      title: "Dev Tools",
+      title: t("devTools"),
       tools: [
         { 
           name: t("comingSoon"), 
-          desc: "JSON Formatter, Base64 converter.", 
+          desc: t("comingSoonDesc"), 
           icon: Code2, 
           href: "#" 
         }

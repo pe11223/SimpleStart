@@ -126,9 +126,9 @@ export function CalendarWidget() {
     .sort((a, b) => a.startDate.localeCompare(b.startDate));
 
   return (
-    <div className="flex flex-col md:flex-row gap-0 h-full max-h-[500px] transition-all relative overflow-hidden">
+    <div className="flex flex-col md:flex-row gap-0 w-full md:h-full md:max-h-[500px] transition-all relative">
       {/* Left: Calendar Grid */}
-      <div className="min-w-[280px] flex-1 flex flex-col transition-all duration-300">
+      <div className="min-w-[280px] w-full flex-1 flex flex-col transition-all duration-300">
         <div className="flex items-center justify-between mb-1 md:mb-2">
             <h3 className="font-bold text-base capitalize flex items-center gap-2">
                 <CalendarIcon className="w-4 h-4 text-blue-500" />

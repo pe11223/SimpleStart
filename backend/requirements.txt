@@ -4,3 +4,7 @@ httpx
 playwright
 sqlmodel
 apscheduler
+EbookLib
+beautifulsoup4
+python-multipart
+pymupdf
