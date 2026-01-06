@@ -16,6 +16,8 @@ import json
 import csv
 import io
 import zipfile
+import httpx
+import base64
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,6 +34,82 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["X-Processing-Stats", "Content-Disposition"],
 )
+
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
+
+@app.get("/api/favicon")
+async def get_favicon(url: str):
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is required")
+    
+    # 1. Ensure URL has schema
+    if not url.startswith("http"):
+        url = "https://" + url
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+    }
+
+    async with httpx.AsyncClient(follow_redirects=True, verify=False, timeout=5.0) as client:
+        try:
+            # 2. Try to fetch the page HTML directly
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 200:
+                # 3. Parse HTML for icon links
+                soup = BeautifulSoup(resp.text, 'html.parser')
+                icon_link = (
+                    soup.find("link", rel=lambda x: x and 'icon' in x.lower().split()) or
+                    soup.find("link", rel="apple-touch-icon") or
+                    soup.find("link", rel="shortcut icon")
+                )
+
+                candidates = []
+                
+                # If HTML defines an icon, use it
+                if icon_link and icon_link.get("href"):
+                    candidates.append(urljoin(str(resp.url), icon_link.get("href")))
+
+                # Always add default favicon.ico at root as candidate
+                parsed_uri = urlparse(str(resp.url))
+                base_domain = f"{parsed_uri.scheme}://{parsed_uri.netloc}"
+                candidates.append(urljoin(base_domain, "/favicon.ico"))
+
+                # 4. Try to fetch the image candidates
+                for img_url in candidates:
+                    try:
+                        img_resp = await client.get(img_url, headers=headers, timeout=3.0)
+                        if img_resp.status_code == 200 and len(img_resp.content) > 0:
+                            # Verify it's an image
+                            content_type = img_resp.headers.get("content-type", "").lower()
+                            if "image" in content_type or img_url.endswith(".ico"):
+                                b64_img = base64.b64encode(img_resp.content).decode("utf-8")
+                                # Fallback content type if missing
+                                final_type = content_type if "image" in content_type else "image/x-icon"
+                                return {"icon": f"data:{final_type};base64,{b64_img}"}
+                    except Exception:
+                        continue
+
+        except Exception as e:
+            print(f"Direct scrape failed for {url}: {e}")
+
+        # 5. Last Resort: Fallback to Third-Party APIs (if direct access fails e.g. anti-bot)
+        providers = [
+            f"https://api.uomg.com/api/get.favicon?url={url}",
+            f"https://www.google.com/s2/favicons?domain={url}&sz=128"
+        ]
+        
+        for api in providers:
+            try:
+                resp = await client.get(api, timeout=3.0)
+                if resp.status_code == 200 and "image" in resp.headers.get("content-type", ""):
+                     b64_img = base64.b64encode(resp.content).decode("utf-8")
+                     return {"icon": f"data:{resp.headers.get('content-type')};base64,{b64_img}"}
+            except:
+                continue
+
+    return {"icon": None}
 
 @app.get("/")
 def read_root():

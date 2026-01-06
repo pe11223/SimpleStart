@@ -12,6 +12,7 @@ type Bookmark = {
   id: string;
   title: string;
   url: string;
+  icon?: string;
 };
 
 export function Bookmarks({ className }: { className?: string }) {
@@ -20,14 +21,40 @@ export function Bookmarks({ className }: { className?: string }) {
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newUrl, setNewUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const addBookmark = () => {
+  const addBookmark = async () => {
     if (!newTitle || !newUrl) return;
+    setIsLoading(true);
     const url = newUrl.startsWith("http") ? newUrl : `https://${newUrl}`;
-    setBookmarks([...bookmarks, { id: Date.now().toString(), title: newTitle, url }]);
+    
+    let icon = "";
+    try {
+      // Fetch favicon from backend via Next.js proxy
+      // The rewrite rule in next.config.ts maps /api/py/:path* -> http://127.0.0.1:8000/:path*
+      // So /api/py/api/favicon maps to http://127.0.0.1:8000/api/favicon
+      const res = await fetch(`/api/py/api/favicon?url=${encodeURIComponent(url)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.icon) {
+          icon = data.icon;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch favicon", e);
+    }
+
+    setBookmarks([...bookmarks, { 
+      id: Date.now().toString(), 
+      title: newTitle, 
+      url, 
+      icon 
+    }]);
+    
     setNewTitle("");
     setNewUrl("");
     setIsAdding(false);
+    setIsLoading(false);
   };
 
   const removeBookmark = (id: string) => {
@@ -72,9 +99,10 @@ export function Bookmarks({ className }: { className?: string }) {
             />
             <button 
               onClick={addBookmark}
-              className="bg-blue-500 text-white text-xs font-bold py-1 rounded-lg mt-1"
+              disabled={isLoading}
+              className="bg-blue-500 text-white text-xs font-bold py-1 rounded-lg mt-1 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {t("add")}
+              {isLoading ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"/> : t("add")}
             </button>
           </motion.div>
         )}
@@ -92,8 +120,12 @@ export function Bookmarks({ className }: { className?: string }) {
               rel="noopener noreferrer"
               className="flex items-center gap-2 flex-1 min-w-0"
             >
-              <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                <img src={`https://www.google.com/s2/favicons?domain=${b.url}&sz=32`} alt="" className="w-4 h-4" />
+              <div className="w-6 h-6 rounded-lg bg-white dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden">
+                {b.icon && b.icon.startsWith("data:image") ? (
+                  <img src={b.icon} alt="" className="w-5 h-5 object-contain" onError={(e) => {e.currentTarget.src = `https://api.uomg.com/api/get.favicon?url=${b.url}`}} />
+                ) : (
+                  <img src={`https://api.uomg.com/api/get.favicon?url=${b.url}`} alt="" className="w-5 h-5 object-contain" onError={(e) => {(e.target as HTMLImageElement).style.display = 'none'}} />
+                )}
               </div>
               <span className="text-sm truncate">{b.title}</span>
             </a>

@@ -1,130 +1,181 @@
-# SimpleStart
+# SimpleStart - 程序员的一体化极简工作台
 
-**SimpleStart** 是一个极简、高颜值且响应式的程序员专属起始页。它集成了聚合搜索、开发工具下载加速、GitHub 趋势浏览以及个性化书签管理等功能，旨在提供一个无干扰、高效的浏览器新标签页体验。
+<div align="center">
 
-![Screenshot Placeholder](public/window.svg)
+![SimpleStart](public/window.svg) <!-- 这里可以替换为实际的项目截图 -->
 
-## ✨ 核心特性
+**高颜值 · 响应式 · 自动化**
 
-### 1. 极简首页 (The Dashboard)
-- **聚合搜索**：中央搜索框支持 Tab 键快速切换搜索引擎（Google, Baidu, GitHub, Stack Overflow 等）。
-- **动态背景**：流体渐变背景，支持随系统自动切换深色/浅色模式 (Dark/Light Mode)。
-- **实用组件**：内置数字时钟、日历挂件（支持事件标记）。
-- **快捷书签**：支持分组管理的书签系统，支持拖拽排序（PC）和长按管理（Mobile）。
+一个专为开发者打造的浏览器起始页。无需维护，自动加速，开箱即用。
 
-### 2. 应用中心 (App Center)
-- **手动配置**：通过 `backend/apps.json` 灵活配置常用开发工具。
-- **多版本管理**：支持维护软件的历史版本下载链接。
-- **下载加速**：针对 VS Code、GitHub Release 等提供国内加速镜像链接（需在 JSON 中配置）。
-- **移动端优化**：完美适配手机屏幕，支持触摸交互。
+[特性](#特性) • [演示](#演示) • [部署](#部署指南) • [开发](#本地开发) • [贡献](#贡献)
 
-### 3. 技术聚合 (Tech Feed)
-- **GitHub Trending**：实时获取 GitHub 热门项目，不错过任何技术热点。
-- **极简阅读**：卡片式布局，侧边栏快速预览。
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![FastAPI](https://img.shields.io/badge/Python-FastAPI-green)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue)
 
-### 4. 本地工具 (Local Tools)
-- **PDF 转换**：内置图片转 PDF 等纯前端实用小工具。
-
-## 🛠️ 技术栈
-
-- **Frontend:** Next.js 16 (Turbopack), Tailwind CSS, Framer Motion
-- **Backend:** Python (FastAPI)
-- **Deployment:** Vercel (Frontend) + Any Python Host
-
-## 🚀 快速开始
-
-### 环境要求
-- Node.js 18+
-- Python 3.10+
-
-### 1. 启动项目 (一键脚本)
-
-项目根目录提供了 `start.sh` 脚本，可同时启动前后端服务：
-
-```bash
-# Windows (Git Bash / WSL)
-./start.sh
-```
-
-### 2. 手动启动
-
-#### Backend (Port 8000)
-
-```bash
-cd backend
-# 创建并激活虚拟环境
-python -m venv venv
-# Windows
-.\venv\Scripts\activate
-# Mac/Linux
-source venv/bin/activate
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 启动服务
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-#### Frontend (Port 3000)
-
-```bash
-cd frontend
-# 安装依赖
-npm install
-
-# 启动开发服务器
-npm run dev
-```
-
-访问地址：
-- 前端页面：`http://localhost:3000`
-- 后端 API：`http://localhost:8000`
-
-## ⚙️ 配置说明
-
-### 应用中心配置 (`backend/apps.json`)
-
-应用中心的数据不再依赖数据库爬虫，而是直接读取 `backend/apps.json` 文件。你可以按照以下格式手动添加或修改应用：
-
-```json
-[
-  {
-    "id": 1,
-    "name": "VS Code",
-    "category": "Programming",
-    "description": "Code editing. Redefined.",
-    "icon_url": "https://code.visualstudio.com/assets/images/code-stable.png",
-    "homepage_url": "https://code.visualstudio.com/",
-    "versions": [
-      {
-        "version": "1.85.1",
-        "date": "2023-12-13",
-        "url": "https://vscode.cdn.azure.cn/stable/..." 
-      }
-    ]
-  }
-]
-```
-
-### 环境变量
-
-在 `frontend` 目录下创建 `.env.local` (可选)：
-
-```env
-# 指定后端 API 地址
-BACKEND_PORT=8000
-```
-
-## 📱 移动端适配
-
-项目针对移动端进行了深度优化：
-- **动态视口高度 (dvh)**：解决移动端浏览器地址栏遮挡问题。
-- **触控优化**：搜索框按钮位置调整，下拉菜单支持惯性滚动。
-- **PWA 支持**：可添加到主屏幕作为独立应用使用。
+</div>
 
 ---
 
+## 📖 简介
 
+**SimpleStart** 不仅仅是一个浏览器导航页。它旨在解决开发者日常工作中的琐碎痛点：
+1.  **书签混乱**：提供支持文件夹的本地书签管理，自动抓取高清图标。
+2.  **环境配置慢**：内置软件下载加速（Smart Accelerator），自动将 GitHub Release、VS Code 等国外下载链接替换为国内高速镜像。
+3.  **信息焦虑**：聚合 GitHub Trending，让你不错过每日技术热点。
+4.  **美学追求**：采用 Modern Minimalist 设计风格，支持日/夜间模式自动切换，Glassmorphism 毛玻璃特效。
 
-© 2026 SimpleStart
+---
+
+## ✨ 特性
+
+### 🖥️ 极简仪表盘 (Dashboard)
+- **极致美学**：大圆角卡片设计，丝滑的 Framer Motion 动画。
+- **动态组件**：包含像素风时钟、可持久化配置的日历组件、天气（开发中）。
+- **本地书签**：
+    - 支持无限层级文件夹。
+    - **智能图标抓取**：自动解析网页 Favicon，优先尝试直连，失败自动回退至国内 CDN 节点，并支持本地缓存。
+    - **隐私优先**：所有数据存储在本地浏览器或自托管数据库中。
+
+### 🚀 应用中心 (App Store)
+- **自动爬虫**：后端 Python 爬虫定期抓取常用开发工具（VS Code, Git, Node.js, Python 等）的最新版本号。
+- **下载加速**：
+    - 智能识别下载链接。
+    - 自动替换 `github.com` 为国内加速代理。
+    - 自动替换 `azure.cn` 等 CDN 节点。
+
+### 🛠️ 开发者工具箱
+- **Tech Feed**：实时聚合 GitHub Trending 热门项目，不错过任何技术趋势。
+- **本地工具**：内置 PDF 转图片、EPUB 术语替换等实用小工具（无需上传文件到第三方服务器）。
+
+---
+
+## 🛠️ 技术栈
+
+| 模块 | 技术选型 | 说明 |
+| :--- | :--- | :--- |
+| **Frontend** | **Next.js 14** | App Router, React Server Components |
+| **Styling** | **Tailwind CSS** | 配合 framer-motion 实现流畅动画 |
+| **Backend** | **Python (FastAPI)** | 高性能异步 API 框架 |
+| **Crawler** | **Playwright / HTTPX** | 负责应用版本抓取与网页图标解析 |
+| **Database** | **SQLite (SQLModel)** | 轻量级，无需配置，适合单人部署 |
+| **Deploy** | **Docker Compose** | 一键容器化部署 |
+
+---
+
+## 📦 部署指南
+
+我们强烈推荐使用 Docker 进行部署，这是最简单且无侵入的方式。
+
+### 方法一：Docker Compose (推荐)
+
+1.  **克隆仓库**
+    ```bash
+    git clone https://github.com/your-username/SimpleStart.git
+    cd SimpleStart
+    ```
+
+2.  **启动服务**
+    ```bash
+    docker-compose up -d
+    ```
+
+3.  **访问**
+    - 前端页面：`http://localhost:3000`
+    - 后端 API：`http://localhost:8000`
+
+### 方法二：手动部署 (传统方式)
+
+<details>
+<summary>点击展开手动部署步骤</summary>
+
+#### 后端 (Backend)
+
+1.  进入后端目录并创建虚拟环境：
+    ```bash
+    cd backend
+    python -m venv venv
+    ```
+2.  激活环境并安装依赖：
+    - Windows: `.\venv\Scripts\activate`
+    - Linux/Mac: `source venv/bin/activate`
+    ```bash
+    pip install -r requirements.txt
+    playwright install chromium
+    ```
+3.  启动后端：
+    ```bash
+    uvicorn main:app --host 0.0.0.0 --port 8000
+    ```
+
+#### 前端 (Frontend)
+
+1.  进入前端目录并安装依赖：
+    ```bash
+    cd frontend
+    npm install
+    ```
+2.  构建并启动：
+    ```bash
+    npm run build
+    npm start
+    ```
+</details>
+
+---
+
+## 💻 本地开发
+
+如果你想参与贡献或修改代码，请按以下步骤配置开发环境。
+
+### 1. 环境准备
+- Node.js 18+
+- Python 3.10+
+- Git
+
+### 2. 快速启动 (Windows)
+我们提供了一键启动脚本（推荐）：
+```powershell
+# 在项目根目录运行
+./start.ps1
+```
+
+### 3. 手动启动
+
+**后端：**
+```bash
+cd backend
+# 首次运行需安装依赖
+# pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+**前端：**
+```bash
+cd frontend
+# 首次运行需安装依赖
+# npm install
+npm run dev
+```
+
+浏览器访问 `http://localhost:3000` 即可看到开发版。
+
+---
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+1.  Fork 本仓库
+2.  创建你的特性分支 (`git checkout -b feature/AmazingFeature`)
+3.  提交你的修改 (`git commit -m 'Add some AmazingFeature'`)
+4.  推送到分支 (`git push origin feature/AmazingFeature`)
+5.  开启一个 Pull Request
+
+---
+
+## 📄 许可证
+
+本项目采用 [MIT License](LICENSE) 开源许可证。

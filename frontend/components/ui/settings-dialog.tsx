@@ -7,27 +7,20 @@ import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/language-context";
 
 export function SettingsDialog({ 
+  showCalendar,
   onCalendarToggle 
 }: { 
-  onCalendarToggle?: (enabled: boolean) => void 
+  showCalendar: boolean;
+  onCalendarToggle: (enabled: boolean) => void 
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   
   // Module states
-  const [showCalendar, setShowCalendar] = useState(false);
   const [bgTheme, setBgTheme] = useState("default");
 
   useEffect(() => {
-    // Load modules
-    const savedCal = localStorage.getItem("gemini-show-calendar");
-    if (savedCal) {
-      const val = JSON.parse(savedCal);
-      setShowCalendar(val);
-      onCalendarToggle?.(val);
-    }
-
     // Load Background
     const savedBg = localStorage.getItem("gemini-bg-theme");
     if (savedBg) {
@@ -37,10 +30,7 @@ export function SettingsDialog({
   }, []);
 
   const toggleCalendar = () => {
-    const newVal = !showCalendar;
-    setShowCalendar(newVal);
-    localStorage.setItem("simplestart-show-calendar", JSON.stringify(newVal));
-    onCalendarToggle?.(newVal);
+    onCalendarToggle(!showCalendar);
   };
 
   const applyBgTheme = (themeName: string) => {
@@ -94,7 +84,7 @@ export function SettingsDialog({
                     <div className="relative group cursor-help">
                         <HelpCircle className="w-4 h-4 text-foreground/40 hover:text-foreground/80 transition-colors" />
                         <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-foreground/90 text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                            v0.1.0
+                            v0.1.1
                         </div>
                     </div>
                 </div>

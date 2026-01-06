@@ -11,11 +11,12 @@ import { Store, Briefcase, LayoutGrid, X, Book, Newspaper } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/language-context";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocalStorage } from "@/lib/hooks";
 
 export default function Home() {
   const { t } = useLanguage();
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [showCalendar, setShowCalendar] = useLocalStorage("showCalendar", false);
   const [showBookmarksModal, setShowBookmarksModal] = useState(false);
   const [showTechFeed, setShowTechFeed] = useState(false);
 
@@ -33,7 +34,7 @@ export default function Home() {
 
   return (
     <main className="min-h-[100dvh] w-full flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <SettingsDialog onCalendarToggle={setShowCalendar} />
+      <SettingsDialog showCalendar={showCalendar} onCalendarToggle={setShowCalendar} />
       
       {/* Top Left Launcher */}
       <div className="fixed top-8 left-8 z-30">

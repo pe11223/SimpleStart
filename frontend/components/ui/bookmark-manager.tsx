@@ -12,6 +12,7 @@ type Item = {
   type: 'link' | 'folder';
   title: string;
   url?: string;
+  icon?: string;
   parentId: string | null;
   createdAt: number;
   clickCount?: number;
@@ -38,6 +39,7 @@ export function BookmarkManager() {
   const [isAdding, setIsAdding] = useState<'link' | 'folder' | null>(null);
   const [newItemTitle, setNewItemTitle] = useState("");
   const [newItemUrl, setNewItemUrl] = useState("");
+  const [isFetchingIcon, setIsFetchingIcon] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   
   // New Features States
@@ -75,21 +77,46 @@ export function BookmarkManager() {
     return crumbs;
   };
 
-  const addItem = () => {
+  const addItem = async () => {
     if (!newItemTitle.trim()) return;
     
+    // Create new item immediately (Optimistic UI)
+    const newId = Date.now().toString();
+    const url = isAdding === 'link' ? (newItemUrl.startsWith("http") ? newItemUrl : `https://${newItemUrl}`) : undefined;
+    
     const newItem: Item = {
-      id: Date.now().toString(),
+      id: newId,
       type: isAdding === 'folder' ? 'folder' : 'link',
       title: newItemTitle,
-      url: isAdding === 'link' ? (newItemUrl.startsWith("http") ? newItemUrl : `https://${newItemUrl}`) : undefined,
+      url,
+      // Temporarily use UOMG for immediate display while we fetch the cached version
+      icon: undefined, 
       parentId: currentFolderId,
       createdAt: Date.now(),
       clickCount: 0
     };
 
+    // Update State Immediately
     setItems([...items, newItem]);
     resetForm();
+
+    // Background Fetch for Icon (if it's a link)
+    if (isAdding === 'link' && url) {
+        try {
+            const res = await fetch(`/api/py/api/favicon?url=${encodeURIComponent(url)}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.icon) {
+                    // Update the specific item with the fetched icon
+                    setItems(prevItems => prevItems.map(item => 
+                        item.id === newId ? { ...item, icon: data.icon } : item
+                    ));
+                }
+            }
+        } catch (e) {
+            console.error("Icon fetch failed", e);
+        }
+    }
   };
 
   const handleLinkClick = (item: Item) => {
@@ -213,16 +240,26 @@ export function BookmarkManager() {
                 className="group relative flex flex-col items-center p-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 transition-colors cursor-pointer select-none"
                 onClick={() => handleLinkClick(item)}
               >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-background shadow-sm mb-3 overflow-hidden relative">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white dark:bg-zinc-800 shadow-sm mb-3 overflow-hidden">
                   {item.type === 'folder' ? (
-                    <Icon className="w-6 h-6 text-yellow-500" fill="currentColor" strokeWidth={1.5} />
+                    <Icon className="w-7 h-7 text-yellow-500" fill="currentColor" strokeWidth={1.5} />
                   ) : (
                     <img 
-                      src={`https://www.google.com/s2/favicons?domain=${item.url}&sz=64`} 
+                      src={item.icon && item.icon.startsWith("data:image") ? item.icon : `https://api.uomg.com/api/get.favicon?url=${item.url}`}
                       alt={item.title}
-                      className="w-6 h-6"
+                      className="w-8 h-8"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
+                        const target = e.currentTarget;
+                        if (!target.src.includes("favicon.ico")) {
+                            try {
+                              const urlObj = new URL(item.url || "");
+                              target.src = `${urlObj.origin}/favicon.ico`;
+                            } catch {
+                              target.style.display = 'none';
+                            }
+                        } else {
+                            target.style.display = 'none';
+                        }
                       }}
                     />
                   )}
@@ -298,7 +335,10 @@ export function BookmarkManager() {
                 )}
                 <div className="flex justify-end gap-2 mt-2">
                   <button onClick={resetForm} className="px-4 py-2 rounded-xl hover:bg-foreground/10 text-sm font-medium">{t("cancel")}</button>
-                  <button onClick={addItem} className="px-6 py-2 rounded-xl bg-blue-500 text-white text-sm font-bold shadow-lg hover:shadow-blue-500/20 transition-all">
+                  <button 
+                    onClick={addItem} 
+                    className="px-6 py-2 rounded-xl bg-blue-500 text-white text-sm font-bold shadow-lg hover:shadow-blue-500/20 transition-all"
+                  >
                     {t("add")}
                   </button>
                 </div>
