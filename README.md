@@ -67,62 +67,88 @@
 
 ## 📦 部署指南
 
-我们强烈推荐使用 Docker 进行部署，这是最简单且无侵入的方式。
+### 方法一：服务器部署 (推荐 - Nginx + PM2)
 
-### 方法一：Docker Compose (推荐)
+此方案适用于生产环境，使用 PM2 管理进程，Nginx 反向代理域名。
 
-1.  **克隆仓库**
-    ```bash
-    git clone https://github.com/pe11223/SimpleStart.git
-    cd SimpleStart
-    ```
+#### 1. 环境准备
+确保服务器已安装：
+- **Node.js 18+**
+- **Python 3.10+**
+- **Nginx**
+- **PM2**: `npm install -g pm2`
 
-2.  **启动服务**
+#### 2. 后端部署
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 安装 Playwright 及其依赖
+playwright install chromium
+playwright install-deps
+
+# 使用 PM2 启动后端 (端口 8000)
+pm2 start "venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000" --name "ss-backend"
+```
+
+#### 3. 前端部署
+```bash
+cd ../frontend
+npm install
+npm run build
+
+# 使用 PM2 启动前端 (端口 3000)
+pm2 start "npm start -- -p 3000" --name "ss-frontend"
+```
+
+保存进程列表以便开机自启：
+```bash
+pm2 save
+pm2 startup
+```
+
+#### 4. Nginx 配置 (域名访问)
+编辑 Nginx 配置文件（如 `/etc/nginx/sites-available/simplestart`），添加以下内容将域名转发到前端端口：
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com; # 替换为你的域名
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        
+        # 获取真实 IP
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+启用配置并重启 Nginx：
+```bash
+sudo ln -s /etc/nginx/sites-available/simplestart /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### 方法二：Docker Compose
+
+最简单的容器化部署方式。
+
+1.  **启动服务**
     ```bash
     docker-compose up -d
     ```
-
-3.  **访问**
-    - 前端页面：`http://localhost:3000`
-    - 后端 API：`http://localhost:8000`
-
-### 方法二：手动部署 (传统方式)
-
-<details>
-<summary>点击展开手动部署步骤</summary>
-
-#### 后端 (Backend)
-
-1.  进入后端目录并创建虚拟环境：
-    ```bash
-    cd backend
-    python -m venv venv
-    ```
-2.  激活环境并安装依赖：
-    - Windows: `.\venv\Scripts\activate`
-    - Linux/Mac: `source venv/bin/activate`
-    ```bash
-    pip install -r requirements.txt
-    playwright install chromium
-    ```
-3.  启动后端：
-    ```bash
-    uvicorn main:app --host 0.0.0.0 --port 8000
-    ```
-
-#### 前端 (Frontend)
-
-1.  进入前端目录并安装依赖：
-    ```bash
-    cd frontend
-    npm install
-    ```
-2.  构建并启动：
-    ```bash
-    npm run build
-    npm start
-    ```
-</details>
+2.  **访问**
+    - `http://localhost:3000`
 
 ---
 
