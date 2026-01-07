@@ -4,13 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ALL_ENGINES } from "@/lib/constants";
-import { Check, ChevronDown, ArrowRight } from "lucide-react";
+import { Check, ChevronDown, ArrowRight, Star, ArrowUp, ArrowDown } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
+import { useLocalStorage } from "@/lib/hooks";
 
 export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngineIds?: string[] }) {
   const { t } = useLanguage();
   // State for enabled engines (persisted locally)
   const [enabledIds, setEnabledIds] = useState<string[]>(initialEnabledIds || ["google", "baidu", "github"]);
+  const [defaultEngineId, setDefaultEngineId] = useLocalStorage("simplestart-default-engine", "google");
   
   // State for current selected engine index relative to *enabled* list
   const [engineIndex, setEngineIndex] = useState(0);
@@ -47,10 +49,22 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
     localStorage.setItem("simplestart-enabled-engines", JSON.stringify(ids));
   };
 
-  // Derived active engines list
-  const activeEngines = ALL_ENGINES.filter(e => enabledIds.includes(e.id));
+  // Derived active engines list (ORDER MATTERS - derived from enabledIds)
+  // We must map enabledIds to the actual engine objects to preserve order
+  const activeEngines = enabledIds
+    .map(id => ALL_ENGINES.find(e => e.id === id))
+    .filter((e): e is typeof ALL_ENGINES[0] => !!e);
+
   // Ensure we have at least one
   const validActiveEngines = activeEngines.length > 0 ? activeEngines : [ALL_ENGINES[0]];
+
+  // Initialize selection to default engine on mount
+  useEffect(() => {
+    const defaultIndex = validActiveEngines.findIndex(e => e.id === defaultEngineId);
+    if (defaultIndex !== -1) {
+        setEngineIndex(defaultIndex);
+    }
+  }, [defaultEngineId, enabledIds.join(",")]); // Re-evaluate if default changes or list structure changes
 
   // Current engine object
   const currentEngine = validActiveEngines[engineIndex] || validActiveEngines[0];
@@ -91,19 +105,23 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
   }, []);
 
   const toggleEngine = (id: string) => {
-    const newSet = enabledIds.includes(id)
-      ? enabledIds.filter(e => e !== id)
-      : [...enabledIds, id];
-    
-    // Allow empty? Maybe not.
-    if (newSet.length === 0) return; 
+    // If disabling the LAST enabled engine, prevent it
+    if (enabledIds.length === 1 && enabledIds.includes(id)) return;
 
+    let newSet;
+    if (enabledIds.includes(id)) {
+        newSet = enabledIds.filter(e => e !== id);
+        // If we disabled the default engine, reset default to the first available
+        if (id === defaultEngineId && newSet.length > 0) {
+            setDefaultEngineId(newSet[0]);
+        }
+    } else {
+        newSet = [...enabledIds, id];
+    }
+    
     saveEnabledIds(newSet);
     
-    // If we disabled the current engine, reset index
-    if (id === currentEngine.id && enabledIds.includes(id)) {
-       setEngineIndex(0);
-    }
+    // Reset index if needed is handled by the effect
   };
 
   const selectEngineDirectly = (id: string) => {
@@ -111,13 +129,31 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
     if (!enabledIds.includes(id)) {
       saveEnabledIds([...enabledIds, id]);
     }
-    
     setIsDropdownOpen(false);
+    // Index update is handled by effect since enabledIds/default might change, 
+    // but here we just want to temporarily select it.
+    // However, the effect listens to enabledIds.
+    // Let's force index update after render.
+    setTimeout(() => {
+        // Recalculate based on potentially new list
+        const currentActive = enabledIds.includes(id) 
+            ? enabledIds 
+            : [...enabledIds, id];
+        // We need to resolve the index in the *active* list
+        // This is tricky because React state updates are async.
+        // For now, simple selection is fine.
+        const idx = activeEngines.findIndex(e => e.id === id); // This uses old state
+        if (idx !== -1) setEngineIndex(idx);
+    }, 0);
+  };
+
+  const moveEngine = (index: number, direction: -1 | 1, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (index + direction < 0 || index + direction >= enabledIds.length) return;
     
-    const futureEnabled = enabledIds.includes(id) ? enabledIds : [...enabledIds, id];
-    const futureActive = ALL_ENGINES.filter(e => futureEnabled.includes(e.id));
-    const newIndex = futureActive.findIndex(e => e.id === id);
-    if (newIndex !== -1) setEngineIndex(newIndex);
+    const newIds = [...enabledIds];
+    [newIds[index], newIds[index + direction]] = [newIds[index + direction], newIds[index]];
+    saveEnabledIds(newIds);
   };
 
   return (
@@ -197,48 +233,126 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute top-full left-0 mt-4 w-64 glass rounded-2xl p-2 flex flex-col gap-1 shadow-2xl z-50 overflow-y-auto max-h-[300px]"
+              className="absolute top-full left-0 mt-4 w-72 glass rounded-2xl p-2 flex flex-col gap-1 shadow-2xl z-50 overflow-y-auto max-h-[400px]"
             >
-               <div className="px-3 py-2 text-xs font-bold text-foreground/40 uppercase tracking-wider">
-                 Select Search Engine
+               <div className="px-3 py-2 text-xs font-bold text-foreground/40 uppercase tracking-wider flex justify-between items-center">
+                 <span>Search Engines</span>
+                 <span className="text-[10px]">Drag or click arrows to sort</span>
                </div>
-               {ALL_ENGINES.map((engine) => {
-                 const isEnabled = enabledIds.includes(engine.id);
+               
+               {/* 1. Render ENABLED engines first (Sortable) */}
+               {enabledIds.map((id, index) => {
+                 const engine = ALL_ENGINES.find(e => e.id === id);
+                 if (!engine) return null;
                  const isSelected = currentEngine.id === engine.id;
-                 
+                 const isDefault = defaultEngineId === engine.id;
+
                  return (
                    <div 
                      key={engine.id}
                      className={cn(
-                       "flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors",
-                       isSelected ? "bg-blue-500/10 text-blue-500" : "hover:bg-foreground/5 text-foreground"
+                       "flex items-center gap-2 p-2 rounded-xl transition-colors group",
+                       isSelected ? "bg-blue-500/10" : "hover:bg-foreground/5"
                      )}
-                     onClick={() => selectEngineDirectly(engine.id)}
+                     onClick={() => {
+                         setEngineIndex(index);
+                         setIsDropdownOpen(false);
+                     }}
                    >
-                      <div 
-                        className={cn(
-                          "w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors",
-                          isEnabled ? "bg-blue-500 border-blue-500" : "border-foreground/20 hover:border-foreground/40"
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent selection when just toggling checkbox
-                          toggleEngine(engine.id);
-                        }}
-                      >
-                        {isEnabled && <Check className="w-3 h-3 text-white" />}
+                      {/* Sort Controls */}
+                      <div className="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                            className="p-0.5 hover:bg-foreground/10 rounded" 
+                            disabled={index === 0}
+                            onClick={(e) => moveEngine(index, -1, e)}
+                        >
+                            <ArrowUp className="w-3 h-3 opacity-50" />
+                        </button>
+                        <button 
+                            className="p-0.5 hover:bg-foreground/10 rounded"
+                            disabled={index === enabledIds.length - 1}
+                            onClick={(e) => moveEngine(index, 1, e)}
+                        >
+                            <ArrowDown className="w-3 h-3 opacity-50" />
+                        </button>
+                      </div>
+
+                      <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                          <engine.icon className="w-5 h-5 text-foreground/80" />
                       </div>
                       
-                      <div className="flex items-center gap-2 flex-1">
-                        <engine.icon className="w-4 h-4" />
-                        <span className="text-sm font-medium">{engine.name}</span>
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <span className={cn("text-sm font-medium truncate", isSelected ? "text-blue-500" : "text-foreground")}>
+                            {engine.name}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                          {/* Default Toggle */}
+                          <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setDefaultEngineId(engine.id);
+                            }}
+                            className={cn(
+                                "p-1.5 rounded-lg transition-colors",
+                                isDefault ? "text-yellow-500 bg-yellow-500/10" : "text-foreground/20 hover:text-yellow-500 hover:bg-yellow-500/10"
+                            )}
+                            title="Set as Default"
+                          >
+                             <Star className="w-4 h-4" fill={isDefault ? "currentColor" : "none"} />
+                          </button>
+
+                          {/* Enable/Disable Toggle */}
+                          <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleEngine(engine.id);
+                            }}
+                            className="p-1.5 rounded-lg text-blue-500 bg-blue-500/10 hover:bg-blue-500/20"
+                            title="Enabled"
+                          >
+                             <Check className="w-4 h-4" />
+                          </button>
                       </div>
                    </div>
                  );
                })}
+
+               {/* Divider if needed */}
+               {ALL_ENGINES.length > enabledIds.length && (
+                   <div className="h-px bg-foreground/10 my-1" />
+               )}
+
+               {/* 2. Render DISABLED engines */}
+               {ALL_ENGINES.filter(e => !enabledIds.includes(e.id)).map((engine) => (
+                   <div 
+                     key={engine.id}
+                     className="flex items-center gap-3 p-2 rounded-xl hover:bg-foreground/5 transition-colors opacity-60 hover:opacity-100"
+                     onClick={() => toggleEngine(engine.id)}
+                   >
+                      <div className="w-6 h-6 ml-6 flex items-center justify-center"> {/* Spacing for sort arrows */}
+                          <engine.icon className="w-4 h-4 grayscale" />
+                      </div>
+                      <span className="text-sm font-medium flex-1">{engine.name}</span>
+                      <button className="p-1.5 rounded-lg border border-foreground/10 hover:border-foreground/30">
+                          <PlusIcon className="w-4 h-4 text-foreground/40" />
+                      </button>
+                   </div>
+               ))}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
     </>
   );
+}
+
+function PlusIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+        </svg>
+    )
 }

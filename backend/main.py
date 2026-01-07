@@ -179,13 +179,63 @@ def read_root():
     return {"message": "SimpleStart API is running"}
 
 @app.get("/tools")
-def get_tools():
+def get_tools(session: Session = Depends(get_session)):
+    # 1. Load config
+    config_tools = []
     try:
         with open("apps.json", "r", encoding="utf-8") as f:
-            tools = json.load(f)
-        return tools
+            config_tools = json.load(f)
     except FileNotFoundError:
-        return []
+        pass
+    
+    # 2. Load DB tools
+    db_tools = session.exec(select(Tool)).all()
+    db_map = {t.name: t for t in db_tools}
+    
+    final_tools = []
+    
+    # 3. Process Config Tools (base list)
+    for app in config_tools:
+        db_app = db_map.get(app["name"])
+        if db_app:
+            # Merge DB data (Auto-updated or Manually Edited via API)
+            app["id"] = db_app.id
+            app["category"] = db_app.category or app.get("category")
+            app["homepage_url"] = db_app.homepage_url or app.get("homepage_url")
+            app["icon_url"] = db_app.icon_url or app.get("icon_url")
+            
+            # If DB has version info, it takes precedence for "latest"
+            if db_app.version:
+                app["version"] = db_app.version
+                app["smart_download_url"] = db_app.smart_download_url
+                # Construct single-version list for the frontend to render "Direct Download" or "Latest"
+                app["versions"] = [{
+                    "version": db_app.version,
+                    "url": db_app.smart_download_url or db_app.original_download_url
+                }]
+            
+            # Remove from map so we know it's handled
+            del db_map[app["name"]]
+        
+        final_tools.append(app)
+        
+    # 4. Add remaining DB tools (created via API but not in apps.json)
+    for db_app in db_map.values():
+        final_tools.append({
+            "id": db_app.id,
+            "name": db_app.name,
+            "category": db_app.category,
+            "homepage_url": db_app.homepage_url,
+            "icon_url": db_app.icon_url,
+            "version": db_app.version,
+            "smart_download_url": db_app.smart_download_url,
+            "versions": [{
+                "version": db_app.version,
+                "url": db_app.smart_download_url or db_app.original_download_url
+            }] if db_app.version else []
+        })
+        
+    return final_tools
 
 from typing import List
 

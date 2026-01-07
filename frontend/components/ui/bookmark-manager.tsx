@@ -30,6 +30,79 @@ const getFolderIcon = (name: string) => {
   return Folder;
 };
 
+const BookmarkItem = ({ 
+  item, 
+  isFlatView, 
+  onClick, 
+  onDelete 
+}: { 
+  item: Item; 
+  isFlatView: boolean; 
+  onClick: (item: Item) => void; 
+  onDelete: (id: string) => void;
+}) => {
+  const [imageError, setImageError] = useState(false);
+  const Icon = item.type === 'folder' ? getFolderIcon(item.title) : LinkIcon;
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="group relative flex flex-col items-center p-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 transition-colors cursor-pointer select-none"
+      onClick={() => onClick(item)}
+    >
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white dark:bg-zinc-800 shadow-sm mb-3 overflow-hidden relative">
+        {item.type === 'folder' ? (
+          <Icon className="w-7 h-7 text-yellow-500" fill="currentColor" strokeWidth={1.5} />
+        ) : (
+          (imageError || !item.icon && !item.url) ? (
+             <div className="w-full h-full bg-blue-500 text-white flex items-center justify-center font-bold text-xl uppercase">
+               {item.title.charAt(0)}
+             </div>
+          ) : (
+            <img 
+              src={item.icon && item.icon.startsWith("data:image") ? item.icon : `https://api.uomg.com/api/get.favicon?url=${item.url}`}
+              alt={item.title}
+              className="w-8 h-8"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.src.includes("favicon.ico") && item.url) {
+                    try {
+                      const urlObj = new URL(item.url || "");
+                      target.src = `${urlObj.origin}/favicon.ico`;
+                    } catch {
+                      setImageError(true);
+                    }
+                } else {
+                    setImageError(true);
+                }
+              }}
+            />
+          )
+        )}
+        {/* Click Count Badge (Flat View Only) */}
+        {isFlatView && (item.clickCount || 0) > 0 && (
+          <div className="absolute top-0 right-0 bg-blue-500 text-white text-[9px] px-1 rounded-bl-lg font-bold">
+            {item.clickCount}
+          </div>
+        )}
+      </div>
+      <span className="text-sm font-medium text-center line-clamp-2 w-full text-foreground/80 group-hover:text-foreground transition-colors">{item.title}</span>
+      
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(item.id);
+        }}
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+      >
+        <Trash2 className="w-3 h-3" />
+      </button>
+    </motion.div>
+  );
+};
+
 export function BookmarkManager() {
   const { t } = useLanguage();
   const [items, setItems] = useLocalStorage<Item[]>("simplestart-enhanced-bookmarks", []);
@@ -37,6 +110,8 @@ export function BookmarkManager() {
   
   // UI States
   const [isAdding, setIsAdding] = useState<'link' | 'folder' | null>(null);
+  const [targetFolderId, setTargetFolderId] = useState<string | null>(null); // Captured ID for adding
+  
   const [newItemTitle, setNewItemTitle] = useState("");
   const [newItemUrl, setNewItemUrl] = useState("");
   const [isFetchingIcon, setIsFetchingIcon] = useState(false);
@@ -77,10 +152,15 @@ export function BookmarkManager() {
     return crumbs;
   };
 
+  const startAdding = (type: 'link' | 'folder') => {
+    setIsAdding(type);
+    setTargetFolderId(currentFolderId); // Capture current folder
+  };
+
   const addItem = async () => {
     if (!newItemTitle.trim()) return;
     
-    // Create new item immediately (Optimistic UI)
+    // Create new item using captured targetFolderId
     const newId = Date.now().toString();
     const url = isAdding === 'link' ? (newItemUrl.startsWith("http") ? newItemUrl : `https://${newItemUrl}`) : undefined;
     
@@ -91,7 +171,7 @@ export function BookmarkManager() {
       url,
       // Temporarily use UOMG for immediate display while we fetch the cached version
       icon: undefined, 
-      parentId: currentFolderId,
+      parentId: targetFolderId, // Use captured ID
       createdAt: Date.now(),
       clickCount: 0
     };
@@ -157,6 +237,14 @@ export function BookmarkManager() {
     setNewItemTitle("");
     setNewItemUrl("");
     setIsAdding(null);
+    setTargetFolderId(null);
+  };
+
+  // Helper to show where the new item will be added
+  const getTargetFolderName = () => {
+      if (!targetFolderId) return t("root");
+      const folder = items.find(i => i.id === targetFolderId);
+      return folder ? folder.title : t("root");
   };
 
   return (
@@ -229,61 +317,15 @@ export function BookmarkManager() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           
           {/* Items */}
-          {displayItems.map(item => {
-            const Icon = item.type === 'folder' ? getFolderIcon(item.title) : LinkIcon;
-            return (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="group relative flex flex-col items-center p-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 transition-colors cursor-pointer select-none"
-                onClick={() => handleLinkClick(item)}
-              >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white dark:bg-zinc-800 shadow-sm mb-3 overflow-hidden">
-                  {item.type === 'folder' ? (
-                    <Icon className="w-7 h-7 text-yellow-500" fill="currentColor" strokeWidth={1.5} />
-                  ) : (
-                    <img 
-                      src={item.icon && item.icon.startsWith("data:image") ? item.icon : `https://api.uomg.com/api/get.favicon?url=${item.url}`}
-                      alt={item.title}
-                      className="w-8 h-8"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (!target.src.includes("favicon.ico")) {
-                            try {
-                              const urlObj = new URL(item.url || "");
-                              target.src = `${urlObj.origin}/favicon.ico`;
-                            } catch {
-                              target.style.display = 'none';
-                            }
-                        } else {
-                            target.style.display = 'none';
-                        }
-                      }}
-                    />
-                  )}
-                  {/* Click Count Badge (Flat View Only) */}
-                  {isFlatView && (item.clickCount || 0) > 0 && (
-                    <div className="absolute top-0 right-0 bg-blue-500 text-white text-[9px] px-1 rounded-bl-lg font-bold">
-                      {item.clickCount}
-                    </div>
-                  )}
-                </div>
-                <span className="text-sm font-medium text-center line-clamp-2 w-full text-foreground/80 group-hover:text-foreground transition-colors">{item.title}</span>
-                
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setItemToDelete(item.id);
-                  }}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              </motion.div>
-            );
-          })}
+          {displayItems.map(item => (
+            <BookmarkItem 
+                key={item.id} 
+                item={item} 
+                isFlatView={isFlatView} 
+                onClick={handleLinkClick} 
+                onDelete={setItemToDelete} 
+            />
+          ))}
 
           {/* Create New Buttons (Only in Normal View) */}
           {!isAdding && !searchQuery && !isFlatView && (
@@ -291,7 +333,7 @@ export function BookmarkManager() {
               {/* Only allow creating folders at Root level */}
               {currentFolderId === null && (
                 <button
-                  onClick={() => setIsAdding('folder')}
+                  onClick={() => startAdding('folder')}
                   className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-foreground/10 hover:border-foreground/30 hover:bg-foreground/5 transition-all gap-3 group"
                 >
                   <FolderPlus className="w-8 h-8 text-foreground/40 group-hover:text-blue-500 transition-colors" />
@@ -299,7 +341,7 @@ export function BookmarkManager() {
                 </button>
               )}
               <button
-                onClick={() => setIsAdding('link')}
+                onClick={() => startAdding('link')}
                 className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-foreground/10 hover:border-foreground/30 hover:bg-foreground/5 transition-all gap-3 group"
               >
                 <Plus className="w-8 h-8 text-foreground/40 group-hover:text-green-500 transition-colors" />
@@ -312,7 +354,10 @@ export function BookmarkManager() {
           {isAdding && (
             <div className="col-span-2 md:col-span-3 lg:col-span-4 bg-foreground/5 rounded-2xl p-6 flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold">{isAdding === 'folder' ? t("createFolder") : t("addBookmark")}</h3>
+                <div className="flex flex-col">
+                    <h3 className="font-bold">{isAdding === 'folder' ? t("createFolder") : t("addBookmark")}</h3>
+                    <span className="text-xs text-foreground/40">{t("addingTo")}: {getTargetFolderName()}</span>
+                </div>
                 <button onClick={resetForm}><X className="w-5 h-5 opacity-50" /></button>
               </div>
               <div className="flex flex-col gap-3">
