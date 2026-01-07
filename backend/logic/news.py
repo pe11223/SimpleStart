@@ -1,40 +1,48 @@
 import httpx
-from playwright.async_api import async_playwright
+from bs4 import BeautifulSoup
 
 async def fetch_github_trending():
     try:
-        # Using playwright to handle any dynamic content, though GitHub Trending is mostly static
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            await page.goto("https://github.com/trending")
+        async with httpx.AsyncClient() as client:
+            # Add headers to mimic a browser
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+            resp = await client.get("https://github.com/trending", headers=headers)
             
-            # Selector for repo rows
-            repos = await page.query_selector_all("article.Box-row")
+            if resp.status_code != 200:
+                print(f"Failed to fetch GitHub Trending: {resp.status_code}")
+                return []
+
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            repos = soup.select("article.Box-row")
             results = []
             
             for repo in repos[:10]: # Top 10
-                title_elem = await repo.query_selector("h2 a")
-                title = await title_elem.inner_text() if title_elem else "Unknown"
-                title = title.replace("\n", "").replace(" ", "")
+                title_elem = repo.select_one("h2 a")
+                if not title_elem:
+                    continue
                 
-                desc_elem = await repo.query_selector("p")
-                desc = await desc_elem.inner_text() if desc_elem else ""
+                # Clean up title (remove newlines and extra spaces)
+                raw_title = title_elem.get_text().strip()
+                title = raw_title.replace("\n", "").replace(" ", "")
                 
-                link = await title_elem.get_attribute("href") if title_elem else ""
+                desc_elem = repo.select_one("p")
+                desc = desc_elem.get_text().strip() if desc_elem else ""
+                
+                link = title_elem.get("href")
                 full_link = f"https://github.com{link}"
                 
-                lang_elem = await repo.query_selector("[itemprop='programmingLanguage']")
-                lang = await lang_elem.inner_text() if lang_elem else ""
+                lang_elem = repo.select_one("[itemprop='programmingLanguage']")
+                lang = lang_elem.get_text().strip() if lang_elem else ""
                 
                 results.append({
                     "title": title,
-                    "description": desc.strip(),
+                    "description": desc,
                     "url": full_link,
                     "language": lang
                 })
             
-            await browser.close()
             return results
     except Exception as e:
         print(f"Error fetching GitHub Trending: {e}")

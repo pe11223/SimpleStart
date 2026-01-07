@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import httpx
-from playwright.async_api import async_playwright
+from bs4 import BeautifulSoup
 from .accelerator import get_smart_link
 from sqlmodel import Session, select
 from models import Tool
@@ -77,21 +77,27 @@ async def fetch_nodejs():
 
 async def fetch_python():
     try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            await page.goto("https://www.python.org/downloads/windows/")
-            version_elem = await page.query_selector("a:has-text('Latest Python 3 Release')")
-            version_text = await version_elem.inner_text() if version_elem else "Python 3"
-            version = version_text.split("-")[-1].strip().replace("Python ", "")
-            await browser.close()
-            return {
-                "name": "Python",
-                "category": "Programming",
-                "version": version,
-                "homepage_url": "https://www.python.org/",
-                "original_download_url": f"https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe"
-            }
+        async with httpx.AsyncClient() as client:
+            # Python download page
+            resp = await client.get("https://www.python.org/downloads/windows/")
+            
+            if resp.status_code == 200:
+                soup = BeautifulSoup(resp.text, 'html.parser')
+                # Find the link that says "Latest Python 3 Release - Python 3.x.x"
+                # Usually it's in a specific structure, but looking for the text is robust enough for simple pages
+                version_elem = soup.find("a", string=lambda t: t and "Latest Python 3 Release" in t)
+                
+                version_text = version_elem.get_text() if version_elem else "Python 3"
+                # Format: "Latest Python 3 Release - Python 3.12.1"
+                version = version_text.split("-")[-1].strip().replace("Python ", "")
+                
+                return {
+                    "name": "Python",
+                    "category": "Programming",
+                    "version": version,
+                    "homepage_url": "https://www.python.org/",
+                    "original_download_url": f"https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe"
+                }
     except Exception as e:
         print(f"Error fetching Python: {e}")
     return None
