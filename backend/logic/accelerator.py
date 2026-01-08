@@ -18,5 +18,22 @@ def get_smart_link(original_url: str) -> str:
         # In production, this might be a configurable environment variable.
         proxy_prefix = "https://ghproxy.cn/" 
         return f"{proxy_prefix}{original_url}"
+    
+    # Node.js Mirror (Huawei)
+    if "nodejs.org/dist" in original_url:
+        return original_url.replace("nodejs.org/dist", "mirrors.huaweicloud.com/nodejs")
+    
+    # Python Mirror (Huawei)
+    if "www.python.org/ftp/python" in original_url:
+        return original_url.replace("www.python.org/ftp/python", "mirrors.huaweicloud.com/python")
+    
+    # Go Mirror (TUNA/USTC)
+    if "go.dev/dl" in original_url:
+        return original_url.replace("go.dev/dl", "mirrors.ustc.edu.cn/golang")
+    
+    # Java (Adoptium/TUNA)
+    if "github.com/adoptium" in original_url and "/releases/download/" in original_url:
+        proxy_prefix = "https://ghproxy.cn/" 
+        return f"{proxy_prefix}{original_url}"
         
     return original_url

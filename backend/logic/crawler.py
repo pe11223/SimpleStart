@@ -19,12 +19,17 @@ async def fetch_vscode():
             resp = await client.get("https://update.code.visualstudio.com/api/update/win32-x64-user/stable/latest", headers=HEADERS)
             if resp.status_code == 200:
                 data = resp.json()
+                version = data.get("name", "Latest")
+                url = data.get("url")
                 return {
                     "name": "VS Code",
                     "category": "Programming",
-                    "version": data.get("name", "Latest"),
+                    "version": version,
                     "homepage_url": "https://code.visualstudio.com/",
-                    "original_download_url": data.get("url")
+                    "original_download_url": url,
+                    "versions": [
+                        {"version": f"Stable ({version})", "url": url}
+                    ]
                 }
     except Exception as e:
         print(f"Error fetching VS Code: {e}")

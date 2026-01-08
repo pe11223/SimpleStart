@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Terminal, Code2, Database, Globe, Container, GitGraph, AppWindow, Zap, Box, Package, Clapperboard, Gamepad, Video, Apple, Smartphone, Plus, Pencil, Trash2, X, Download, ChevronDown, Upload, FileUp } from "lucide-react";
+import { Terminal, Code2, Database, Globe, Container, GitGraph, AppWindow, Zap, Box, Package, Clapperboard, Gamepad, Video, Apple, Smartphone, Plus, Pencil, Trash2, X, Download, ChevronDown, Upload, FileUp, MessageSquare, MessageCircle } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useOS } from "@/lib/hooks";
 
@@ -37,10 +37,13 @@ const ICON_MAP: Record<string, any> = {
   "OBS Studio": Video,
   "Steam": Gamepad,
   "Epic Games": Gamepad,
-  "Discord": Smartphone,
+  "Discord": MessageSquare,
+  "Java": Box,
+  "Go": Zap,
+  "WeChat": MessageCircle,
+  "QQ": MessageCircle,
   "Xcode": Apple,
-  "TikTok": Smartphone,
-  "WeChat": Smartphone
+  "TikTok": Smartphone
 };
 
 export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
@@ -49,6 +52,7 @@ export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
   const [apps, setApps] = useState<Tool[]>([]);
   const [editingApp, setEditingApp] = useState<Tool | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   
   // State for version selection modal
   const [selectedAppForDownload, setSelectedAppForDownload] = useState<Tool | null>(null);
@@ -421,8 +425,14 @@ export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
                       whileTap={{ scale: 0.95 }}
                     >
                       <div className="w-16 h-16 md:w-20 md:h-20 rounded-3xl glass flex flex-col items-center justify-center text-foreground/80 group-hover:bg-foreground/5 transition-colors relative overflow-hidden">
-                        {app.icon_url ? (
-                            <img src={app.icon_url} className="w-full h-full object-cover" alt={app.name} />
+                        {app.icon_url && !failedImages[app.name] ? (
+                            <img 
+                                src={app.icon_url} 
+                                className="w-full h-full object-contain p-2" 
+                                alt={app.name} 
+                                referrerPolicy="no-referrer"
+                                onError={() => setFailedImages(prev => ({ ...prev, [app.name]: true }))}
+                            />
                         ) : (
                             <Icon className="w-8 h-8 md:w-10 md:h-10" strokeWidth={1.5} />
                         )}
@@ -432,7 +442,7 @@ export function AppGrid({ isAdmin }: { isAdmin: boolean }) {
                           </span>
                         )}
                         {((app.versions && app.versions.length === 1) || (!app.versions && app.version)) && (
-                          <span className="absolute top-1 right-1 bg-blue-500 text-[9px] text-white px-1.5 py-0.5 rounded-full font-bold shadow-sm">
+                          <span className="absolute top-1 right-1 bg-blue-500 text-[9px] text-white px-1.5 py-0.5 rounded-full font-bold shadow-sm max-w-[90%] truncate">
                             {app.versions ? app.versions[0].version : app.version}
                           </span>
                         )}

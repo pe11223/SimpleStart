@@ -4,7 +4,7 @@
     "category": "Programming",
     "fetcher": "fetch_vscode",
     "homepage_url": "https://code.visualstudio.com/",
-    "icon_url": "https://code.visualstudio.com/assets/images/code-stable.png",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Visual_Studio_Code_1.35_icon.svg",
     "versions": [
       { "version": "Stable (User)", "url": "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-user" },
       { "version": "Insiders", "url": "https://code.visualstudio.com/sha/download?build=insider&os=win32-x64-user" }
@@ -25,7 +25,7 @@
     "category": "Programming",
     "fetcher": "fetch_nodejs",
     "homepage_url": "https://nodejs.org/",
-    "icon_url": "https://nodejs.org/static/images/logo.svg",
+    "icon_url": "https://cdn.icon-icons.com/icons2/2415/PNG/512/nodejs_plain_logo_icon_146409.png",
     "versions": [
       { "version": "LTS (v20)", "url": "https://nodejs.org/dist/v20.11.0/node-v20.11.0-x64.msi" },
       { "version": "Current (v21)", "url": "https://nodejs.org/dist/v21.6.1/node-v21.6.1-x64.msi" }
@@ -36,10 +36,28 @@
     "category": "Programming",
     "fetcher": "fetch_python",
     "homepage_url": "https://www.python.org/",
-    "icon_url": "https://www.python.org/static/community_logos/python-logo-generic.svg",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg",
     "versions": [
       { "version": "3.12", "url": "https://www.python.org/ftp/python/3.12.1/python-3.12.1-amd64.exe" },
       { "version": "3.11", "url": "https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe" }
+    ]
+  },
+  {
+    "name": "Java",
+    "category": "Programming",
+    "homepage_url": "https://adoptium.net/",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg",
+    "versions": [
+      { "version": "LTS (Temurin 21)", "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jdk_x64_windows_hotspot_21.0.2_13.msi" }
+    ]
+  },
+  {
+    "name": "Go",
+    "category": "Programming",
+    "homepage_url": "https://go.dev/",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg",
+    "versions": [
+      { "version": "Latest", "url": "https://go.dev/dl/go1.22.2.windows-amd64.msi" }
     ]
   },
   {
@@ -67,7 +85,7 @@
     "category": "Games",
     "fetcher": "fetch_steam",
     "homepage_url": "https://store.steampowered.com/",
-    "icon_url": "https://store.steampowered.com/favicon.ico",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
     "versions": [
       { "version": "Latest", "url": "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe" }
     ]
@@ -76,7 +94,7 @@
     "name": "Epic Games",
     "category": "Games",
     "homepage_url": "https://store.epicgames.com/",
-    "icon_url": "https://static-assets-prod.epicgames.com/epic-store/static/favicon.ico",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg",
     "versions": [
       { "version": "Installer", "url": "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.msi" }
     ]
@@ -85,9 +103,27 @@
     "name": "Discord",
     "category": "Social",
     "homepage_url": "https://discord.com/",
-    "icon_url": "https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/sco/9/98/Discord_logo.svg",
     "versions": [
       { "version": "Stable", "url": "https://discord.com/api/download?platform=win" }
+    ]
+  },
+  {
+    "name": "WeChat",
+    "category": "Social",
+    "homepage_url": "https://weixin.qq.com/",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/commons/7/73/WeChat_logo.svg",
+    "versions": [
+      { "version": "Latest", "url": "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe" }
+    ]
+  },
+  {
+    "name": "QQ",
+    "category": "Social",
+    "homepage_url": "https://im.qq.com/",
+    "icon_url": "https://upload.wikimedia.org/wikipedia/commons/6/61/QR_icon.svg",
+    "versions": [
+      { "version": "Latest", "url": "https://dldir1.qq.com/qqfile/qq/PCQQ9.7.23/QQ9.7.23.29315.exe" }
     ]
   }
 ]

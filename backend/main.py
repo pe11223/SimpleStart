@@ -11,6 +11,7 @@ from logic.crawler import crawl_tools
 from logic.news import fetch_github_trending
 from logic.epub_tool import replace_terms_in_epub
 from logic.pdf_tool import convert_pdf_to_images
+from logic.accelerator import get_smart_link
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import json
@@ -230,7 +231,15 @@ def get_tools(session: Session = Depends(get_session)):
             app["id"] = db_app.id
             app["category"] = db_app.category or app.get("category")
             app["homepage_url"] = db_app.homepage_url or app.get("homepage_url")
-            app["icon_url"] = db_app.icon_url or app.get("icon_url")
+            
+            # Icon Priority: Config > DB (unless DB is a local upload)
+            # This allows updating icons in apps.json to take effect immediately
+            config_icon = app.get("icon_url")
+            db_icon = db_app.icon_url
+            if db_icon and "/api/py/uploads" in db_icon:
+                 app["icon_url"] = db_icon
+            else:
+                 app["icon_url"] = config_icon or db_icon
             
             # If DB has version info, it takes precedence for "latest"
             if db_app.version:
@@ -284,7 +293,31 @@ def get_tools(session: Session = Depends(get_session)):
             "smart_download_url": db_app.smart_download_url,
             "versions": versions_list
         })
-        
+    
+    # 5. Inject Mirror Versions (Domestic Acceleration)
+    for tool in final_tools:
+        # Check for available versions to accelerate
+        if tool.get("versions"):
+             # Find a suitable candidate version to mirror (Stable/LTS/Latest)
+             # We prefer "Stable", "LTS", or "Latest"
+             candidate = next((v for v in tool["versions"] if any(k in v.get("version", "") for k in ["Stable", "LTS", "Latest", "Current", "3.", "2."])), None)
+             
+             # Fallback to the first version if no specific tag matches
+             if not candidate and len(tool["versions"]) > 0:
+                 candidate = tool["versions"][0]
+
+             if candidate:
+                mirror_url = get_smart_link(candidate["url"])
+                # Only add if the mirror link is different (meaning acceleration was applied)
+                if mirror_url != candidate["url"] and mirror_url:
+                    # Check if mirror already exists to avoid duplicates
+                    if not any(v.get("group") == "Mirror" for v in tool["versions"]):
+                        tool["versions"].append({
+                            "version": "国内极速版",
+                            "url": mirror_url,
+                            "group": "Mirror"
+                        })
+
     return final_tools
 
 from typing import List
