@@ -236,8 +236,8 @@ export function SearchBar({ enabledEngineIds: initialEnabledIds }: { enabledEngi
               className="absolute top-full left-0 mt-4 w-72 glass rounded-2xl p-2 flex flex-col gap-1 shadow-2xl z-50 overflow-y-auto max-h-[400px]"
             >
                <div className="px-3 py-2 text-xs font-bold text-foreground/40 uppercase tracking-wider flex justify-between items-center">
-                 <span>Search Engines</span>
-                 <span className="text-[10px]">Drag or click arrows to sort</span>
+                 <span>{t("searchEngines")}</span>
+                 <span className="text-[10px]">{t("dragOrClickToSort")}</span>
                </div>
                
                {/* 1. Render ENABLED engines first (Sortable) */}

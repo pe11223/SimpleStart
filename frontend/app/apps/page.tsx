@@ -30,7 +30,9 @@ export default function AppsPage() {
               <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
                 <Rocket className="w-6 h-6" />
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">{t("appCenter")}</h1>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {t("appCenter")} <span className="text-foreground/30 text-2xl font-normal">(PC)</span>
+              </h1>
             </div>
           </div>
         </header>

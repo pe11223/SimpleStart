@@ -12,3 +12,4 @@ class Tool(SQLModel, table=True):
     original_download_url: Optional[str] = None
     smart_download_url: Optional[str] = None
     last_updated: Optional[str] = None
+    versions_json: Optional[str] = None

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Settings, X, Sun, Moon, Languages, Calendar as CalendarIcon, ToggleRight, ToggleLeft, Paintbrush, HelpCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/language-context";
+import pkg from "@/package.json";
 
 export function SettingsDialog({ 
   showCalendar,
@@ -84,7 +85,7 @@ export function SettingsDialog({
                     <div className="relative group cursor-help">
                         <HelpCircle className="w-4 h-4 text-foreground/40 hover:text-foreground/80 transition-colors" />
                         <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-foreground/90 text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                            <span className="font-mono font-bold">v0.1.3</span>
+                            <span className="font-mono font-bold">v{pkg.version}</span>
                         </div>
                     </div>
                 </div>

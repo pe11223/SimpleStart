@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Globe, Folder, ExternalLink, ChevronRight, FolderPlus, ArrowLeft, Trash2, Link as LinkIcon, AlertTriangle, Search, LayoutGrid, List, ShoppingCart, Gamepad, Code2, Music, Book, Video, Film } from "lucide-react";
+import { Plus, X, Globe, Folder, ExternalLink, ChevronRight, FolderPlus, ArrowLeft, Trash2, Link as LinkIcon, AlertTriangle, Search, LayoutGrid, List, ShoppingCart, Gamepad, Code2, Music, Book, Video, Film, Bot, Wrench, Server } from "lucide-react";
 import { useLocalStorage } from "@/lib/hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/lib/language-context";
@@ -21,6 +21,9 @@ type Item = {
 // Helper for smart icons
 const getFolderIcon = (name: string) => {
   const lower = name.toLowerCase();
+  if (lower.includes("ai") || lower.includes("gpt") || lower.includes("llm") || lower.includes("artificial") || lower.includes("智能")) return Bot;
+  if (lower.includes("tool") || lower.includes("util") || lower.includes("kit") || lower.includes("工具")) return Wrench;
+  if (lower.includes("server") || lower.includes("host") || lower.includes("cloud") || lower.includes("vps") || lower.includes("服务器")) return Server;
   if (lower.includes("shop") || lower.includes("buy") || lower.includes("store") || lower.includes("购物") || lower.includes("商城") || lower.includes("买")) return ShoppingCart;
   if (lower.includes("game") || lower.includes("play") || lower.includes("游戏") || lower.includes("电竞")) return Gamepad;
   if (lower.includes("code") || lower.includes("dev") || lower.includes("git") || lower.includes("编程") || lower.includes("开发") || lower.includes("代码")) return Code2;

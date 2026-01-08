@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, BackgroundTasks, UploadFile, File, Form, HTTPException
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from sqlmodel import Session, select
@@ -18,6 +19,8 @@ import io
 import zipfile
 import httpx
 import base64
+import os
+import shutil
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,6 +28,10 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+# Mount uploads directory
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,6 +45,20 @@ app.add_middleware(
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from playwright.async_api import async_playwright
+
+@app.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        file_path = f"uploads/{file.filename}"
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Return the URL relative to the server
+        # Assuming server is on port 8000
+        url = f"http://localhost:8000/uploads/{file.filename}"
+        return {"url": url, "filename": file.filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 @app.get("/api/favicon")
 async def get_favicon(url: str):
@@ -208,6 +229,18 @@ def get_tools(session: Session = Depends(get_session)):
             if db_app.version:
                 app["version"] = db_app.version
                 app["smart_download_url"] = db_app.smart_download_url
+            
+            # Prioritize versions_json from DB if available
+            if db_app.versions_json:
+                try:
+                    app["versions"] = json.loads(db_app.versions_json)
+                except:
+                    # Fallback to single version if JSON parse fails
+                     app["versions"] = [{
+                        "version": db_app.version,
+                        "url": db_app.smart_download_url or db_app.original_download_url
+                    }]
+            elif db_app.version:
                 # Construct single-version list for the frontend to render "Direct Download" or "Latest"
                 app["versions"] = [{
                     "version": db_app.version,
@@ -221,6 +254,19 @@ def get_tools(session: Session = Depends(get_session)):
         
     # 4. Add remaining DB tools (created via API but not in apps.json)
     for db_app in db_map.values():
+        versions_list = []
+        if db_app.versions_json:
+            try:
+                versions_list = json.loads(db_app.versions_json)
+            except:
+                pass
+        
+        if not versions_list and db_app.version:
+             versions_list = [{
+                "version": db_app.version,
+                "url": db_app.smart_download_url or db_app.original_download_url
+            }]
+
         final_tools.append({
             "id": db_app.id,
             "name": db_app.name,
@@ -229,10 +275,7 @@ def get_tools(session: Session = Depends(get_session)):
             "icon_url": db_app.icon_url,
             "version": db_app.version,
             "smart_download_url": db_app.smart_download_url,
-            "versions": [{
-                "version": db_app.version,
-                "url": db_app.smart_download_url or db_app.original_download_url
-            }] if db_app.version else []
+            "versions": versions_list
         })
         
     return final_tools
