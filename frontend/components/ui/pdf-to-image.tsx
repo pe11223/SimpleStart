@@ -30,7 +30,7 @@ export function PdfToImage() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/api/tools/pdf-to-image", {
+      const response = await fetch("/api/py/tools/pdf-to-image", {
         method: "POST",
         body: formData,
       });

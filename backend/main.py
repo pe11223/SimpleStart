@@ -53,9 +53,8 @@ async def upload_file(file: UploadFile = File(...)):
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Return the URL relative to the server
-        # Assuming server is on port 8000
-        url = f"http://localhost:8000/uploads/{file.filename}"
+        # Return the URL relative to the server (proxied via frontend)
+        url = f"/api/py/uploads/{file.filename}"
         return {"url": url, "filename": file.filename}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")

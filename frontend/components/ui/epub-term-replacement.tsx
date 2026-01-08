@@ -47,7 +47,7 @@ export function EpubTermReplacement() {
     formData.append("glossary_file", glossaryFile);
 
     try {
-      const response = await fetch("http://localhost:8000/api/tools/epub-replace", {
+      const response = await fetch("/api/py/tools/epub-replace", {
         method: "POST",
         body: formData,
       });
