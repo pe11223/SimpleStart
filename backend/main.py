@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, BackgroundTasks, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, Depends, BackgroundTasks, UploadFile, File, Form, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
@@ -41,6 +41,14 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["X-Processing-Stats", "Content-Disposition"],
 )
+
+@app.middleware("http")
+async def strip_api_prefix(request: Request, call_next):
+    path = request.url.path
+    if path.startswith("/api/py"):
+        request.scope["path"] = path.replace("/api/py", "", 1)
+    response = await call_next(request)
+    return response
 
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
